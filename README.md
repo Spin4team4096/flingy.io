@@ -1,7 +1,9 @@
 # Flingy.io
 
 > DISCLAIMER: This README is temporarily written with AI, for lack of time lol.
+
 > I did not vibe code this. Not only is that boring, but I already played with fire by vibecoding once, and I never want to do that ever again.
+
 > I did use Claude Code to spot bugs, do minor things (not coding), find shit, and teach me Go/html/css cuz all I knew beforehand was js.
 
 Go game server + JS/canvas client.
