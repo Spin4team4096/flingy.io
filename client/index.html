@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Flingy.io</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='184.359' height='184.359' viewBox='0 0 184.359 184.359'%3E%3Cdefs%3E%3CradialGradient id='a' cx='291.429' cy='133.254' r='88.18' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23f28755'/%3E%3Cstop offset='1' stop-color='%23e0662d'/%3E%3C/radialGradient%3E%3CradialGradient id='b' cx='210.409' cy='210.23' r='15.099' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23f28755'/%3E%3Cstop offset='1' stop-color='%23e0662d'/%3E%3C/radialGradient%3E%3CradialGradient id='c' cx='281.732' cy='140.709' r='35.091' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23f28755'/%3E%3Cstop offset='1' stop-color='%23e0662d'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cg stroke-miterlimit='10'%3E%3Cpath fill='url(%23a)' stroke='%23994e2b' stroke-width='8' d='M151.865 180.044c0-48.7 39.479-88.18 88.18-88.18 48.7 0 88.179 39.48 88.179 88.18s-39.48 88.18-88.18 88.18-88.18-39.48-88.18-88.18z' transform='translate(-147.865 -87.865)'/%3E%3Cpath fill='%23b85325' d='M7.951 92.535c0-24.207 11.218 25.015 38.54 53.455 24.905 25.926 67.311 30.33 45.245 30.33-46.273 0-83.785-37.512-83.785-83.785'/%3E%3Cpath fill='url(%23b)' d='M190.335 227.388c-5.32-6.421-4.428-15.94 1.993-21.26s15.94-4.428 21.26 1.994c5.32 6.42 4.428 15.94-1.994 21.26-6.42 5.32-15.94 4.427-21.26-1.994' transform='translate(-147.865 -87.865)'/%3E%3Cpath fill='%23b85325' d='M44.06 117.064c3.715-5.983-6.297 6.3 5.388 17.827 6.792 5.767 13.691 6.236 17.416 5.833-.028.013-.062.04-.076.05-23.82 10.513-32.327-8.246-22.741-23.675z'/%3E%3Cpath fill='url(%23c)' stroke='%23fff' stroke-width='8' d='M235.08 180.583c-12.365-14.923-10.29-37.044 4.633-49.408s37.043-10.29 49.407 4.633 10.29 37.044-4.633 49.408-37.044 10.29-49.408-4.633z' transform='translate(-147.865 -87.865)'/%3E%3Cpath fill='%23b85325' d='M84.443 62.323c2.562-7.957-6.042 8.085 15.408 25.716 12.056 8.937 21.926 10.438 26.964 10.327-.033.015-.069.047-.084.06-28.723 11.869-48.91-15.539-42.292-36.056z'/%3E%3Cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-width='8' d='m45.37 112.795 22.291 3.499 3.555 22.296-20.201 10.44-16.07-16.09zM67.506 116.25 88.374 95.38'/%3E%3C/g%3E%3C/svg%3E">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            border-radius: calc(8px*var(--ui));
+            font-family: helvetica, arial, sans-serif;
+            user-select: none;
+        }
+        #game {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #menu {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            background: rgba(0,0,0,0.2);
+        }
+
+        #logo {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: calc(128px*var(--ui));
+            -webkit-text-stroke: calc(12px*var(--ui)) var(--red-outline);
+            letter-spacing: calc(4px * var(--ui));
+            font-weight: bold;
+            color: var(--red);
+            user-select: none;
+            paint-order: stroke fill;
+        }
+
+        button {
+            position: relative;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--c);
+            border: calc(6px*var(--ui)) solid var(--c-outline);
+            border-radius: calc(8px*var(--ui));
+            transform: rotate(var(--angle, 0deg));
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #menu-controls {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: calc(12px*var(--ui));
+            #color-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: calc(64px*var(--ui));
+                height: calc(64px*var(--ui));
+                --c: var(--red);
+                --c-outline: var(--red-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+            }
+            #username {
+                width: calc(600px*var(--ui));
+                height: calc(64px*var(--ui));
+                font-size: calc(48px*var(--ui));
+                border: calc(6px*var(--ui)) solid var(--gray);
+                border-radius: calc(8px*var(--ui));
+                box-sizing: border-box;
+                text-align: center;
+            }
+            #play-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: calc(64px*var(--ui));
+                height: calc(64px*var(--ui));
+                --c: var(--lime);
+                --c-outline: var(--lime-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+                .icon {display: none;}
+                .icon-play {display: block;}
+                &.waiting {
+                    --c: var(--red);
+                    --c-outline: var(--red-outline);
+                    .icon {display: none;}
+                    .icon-x {display: block;}
+                }
+                &.retry {
+                    --c: var(--yellow);
+                    --c-outline: var(--yellow-outline);
+                    .icon {display: none;}
+                    .icon-retry {display: block;}
+                }
+                &.finished {
+                    --c: var(--lime);
+                    --c-outline: var(--lime-outline);
+                    .icon {display: none;}
+                    .icon-finished {display: block;}
+                }
+
+            }
+        }
+
+        #message {
+            position: absolute;
+            top: calc(50% + 44px*var(--ui));
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: calc(30px*var(--ui));
+        }
+
+        #status {
+            position: absolute;
+            top: calc(12px*var(--ui));
+            left: calc(12px*var(--ui));
+            max-width: calc(450px*var(--ui));
+            padding: calc(6px*var(--ui));background: var(--c);
+            border: calc(6px*var(--ui)) solid var(--c-outline);
+            border-radius: calc(8px*var(--ui));
+            color: black;
+            font-size: calc(30px*var(--ui));
+            white-space: pre-wrap;
+            user-select: none;
+        }
+
+        #server-list {
+
+        }
+
+        #shop {
+            position: absolute;
+            top: calc(12px*var(--ui));
+            right: calc(12px*var(--ui));
+            display: flex;
+            flex-direction: row;
+            gap: calc(12px*var(--ui));
+            #flings {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                padding: 0;
+                color: black;
+                font-size: calc(30px*var(--ui));
+                white-space: pre-wrap;
+                user-select: none;
+            }
+            #buy-color {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: calc(256px*var(--ui));
+                height: calc(64px*var(--ui));
+                --c: var(--gray);
+                --c-outline: var(--gray-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+                color: black;
+                font-size: calc(30px*var(--ui));
+                font-weight: bold;
+                white-space: pre-wrap;
+                user-select: none;
+                &.rich {
+                    opacity: 1;
+                    display: block;
+                }
+                &.poor {
+                    opacity: 0.5;
+                    display: block;
+                }
+                &.maxed {
+                    display: none;
+                }
+            }
+        }
+
+        #bottom-row {
+            position: absolute;
+            bottom: calc(12px*var(--ui));
+            left: calc(12px*var(--ui));
+            display: flex;
+            flex-direction: row;
+            align-items: left;
+            gap: calc(12px*var(--ui));
+            #settings-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: calc(64px*var(--ui));
+                height: calc(64px*var(--ui));
+                --c: var(--gray);
+                --c-outline: var(--gray-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+            }
+            #changelog-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: calc(64px*var(--ui));
+                height: calc(64px*var(--ui));
+                --c: var(--orange);
+                --c-outline: var(--orange-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+            }
+            #discord-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: calc(64px*var(--ui));
+                height: calc(64px*var(--ui));
+                --c: var(--blue);
+                --c-outline: var(--blue-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+            }
+
+        }
+
+        #tips {
+
+        }
+
+        #overlay {
+
+        }
+
+        .icon {
+            width: calc(44px*var(--ui));
+            height: calc(44px*var(--ui));
+            display: block;
+            stroke-width: 3;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="game"></canvas>
+    <div id="menu">
+        <div id="logo">FLINGY.IO</div>
+        <div id="menu-controls"> <!-- better name? -->
+            <button id="color-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-palette"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+            </button>
+            <input id="username" maxlength="20" placeholder="Enter username..." autocomplete="off" spellcheck="false">
+            <button id="play-button" class="idle">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-finished"><path d="M20 6 9 17l-5-5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-retry"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div id="message">Pick a color and play!</div>
+        <div id="status"></div>
+        <div id="server-list"></div>
+        <div id="shop">
+            <div id="flings">Flings: #🪙</div>
+            <button id="buy-color" title="Buy a random color! (# left)">Buy Color: #🪙</button>
+        </div>
+        <div id="bottom-row">
+            <button id="settings-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button id="changelog-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-changelog"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+            </button>
+            <button id="discord-button" title="Join the Discord!">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-discord"><path d="M19.95 10.05a7 7 0 011.412 7.872 1 1 0 00-.058.787l.675 2.089a1 1 0 01-1.236 1.168l-2.155-.631a1 1 0 00-.745.06 7 7 0 01-7.793-1.445"/><path d="M2.696 12.708a1 1 0 00-.058-.785 7 7 0 113.518 3.473 1 1 0 00-.744-.061l-2.155.63a1 1 0 01-1.236-1.167z"/></svg>
+            </button>
+        </div>
+        <div id="tips"></div>
+    </div>
+    <div id="hud">
+        <div id="notifications"></div>
+        <div id="leaderboard"></div>
+        <button id="leave">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-leave"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+        </button>
+    </div>
+    <div id="settings">
+        <div id="settings-panel"></div>
+    </div>
+    <script>
+        // TODO:
+        // - everything
+
+        if (window.location.hostname == 'flingy.io') {
+            console.log('%c🔴🔴🔴 YOU\'RE ON THE NON-LOCAL VERSION THAT\'S PUSHED ONLINE (may be outdated)🔴🔴🔴', 'background: rgba(255,0,0,0.5); color: black; font-size: 16px; font-weight: bold; padding: 4px;')
+        } else {
+            console.log('%c✅ You\'re local, all good', 'background: rgba(0,255,0,0.2); color: black; font-size: 16px; padding: 4px;')
+        }
+        
+        // Setup
+
+        // Sound Setup
+        let audio = new AudioContext()
+        let soundBuffers = {}
+        let soundNames = ['achievementmc','bonus','bwooop','eliminated','gamestart','hit1','hit2','lose','matchfound','negativeaction','negativeaction2','ping','pointsadd','sling','success','throw','uiclick','uiclick2','uipopup','uipopup2','uipopupclose','victory']
+
+        // UI Setup
+        fov = 480
+        scale = 1
+        uiScale = 1
+
+        const palette = [
+            'red','coral','orange','yellow','lime','green','blue','purple','pink','tan', 'navy','brown','maroon','burgundy','magenta','cyan','leaf','black','gray','white'
+        ]
+        for (const color of palette) {
+            document.documentElement.style.setProperty(`--${color}`, colorsToHex(color))
+            document.documentElement.style.setProperty(`--${color}-outline`, colorsToOutlineHex(color))
+        }
+
+        const canvas = document.getElementById('game')
+        const ctx = canvas.getContext('2d')
+        resize()
+
+        ui = {
+            menu: {
+                logo: document.getElementById('logo'),
+                menuControls: {
+                    colorButton: document.getElementById('color-button'),
+                    username: document.getElementById('username'),
+                    playButton: document.getElementById('play-button'),
+                },
+                message: document.getElementById('message'),
+                status: document.getElementById('status'),
+                serverList: document.getElementById('server-list'),
+                shop: {
+                    flings: document.getElementById('flings'),
+                    buyColor: document.getElementById('buy-color'),
+                },
+                bottomRow: {
+                    settingsButton: document.getElementById('settings-button'),
+                    changelogButton: document.getElementById('changelog-button'),
+                    discordButton: document.getElementById('discord-button'),
+                },
+                tips: document.getElementById('tips'),
+            },
+            hud: {
+                notifications: document.getElementById('notifications'),
+                leaderboard: document.getElementById('leaderboard'),
+                leave: document.getElementById('leave'),
+            },
+            settings: {
+                panel: document.getElementById('settings-panel'),
+            },
+        }
+
+        // Firebase Setup
+        const app = firebase.initializeApp({
+            databaseURL: "https://spinbase4096-default-rtdb.europe-west1.firebasedatabase.app/"
+        })
+        const database = firebase.database()
+        
+        // Event Listeners
+
+        let mouseX = 0
+        let mouseY = 0
+        let lastMouseX = 0
+        let lastMouseY = 0
+        let leftMouseDown = false
+        let middleMouseDown = false
+        let rightMouseDown = false
+        let isScrollingUp = false
+        let isScrollingDown = false
+
+        touchPoints = []
+        sticks = []
+        nextStickId = 0
+        inputMethod = 'keyboard'
+        touchActive = false
+        flingFrames = 0
+
+        addEventListener('resize', resize)
+        function resize() {
+            canvas.width = innerWidth
+            canvas.height = innerHeight
+
+            scale = Math.max(canvas.width/(fov*16/9), canvas.height/fov)
+            uiScale = scale/Math.max(1920/(fov*16/9), 1080/fov)
+
+            document.documentElement.style.setProperty('--ui', uiScale)
+        }
+
+        canvas.addEventListener('mousemove', e => {
+            mouseX = e.offsetX - canvas.width/2
+            mouseY = e.offsetY - canvas.height/2
+        })
+        canvas.addEventListener('mousedown', e => {
+            if (e.button === 0) {
+                leftMouseDown = true
+            } else if (e.button === 1) {
+                middleMouseDown = true
+            } else if (e.button === 2) {
+                rightMouseDown = true
+            }
+        })
+        canvas.addEventListener('mouseup', e => {
+            if (e.button === 0) {
+                leftMouseDown = false
+            } else if (e.button === 1) {
+                middleMouseDown = false
+            } else if (e.button === 2) {
+                rightMouseDown = false
+            }
+        })
+        canvas.addEventListener('contextmenu', e => {e.preventDefault()})
+
+        let scrollTimeout
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault()
+            isScrollingUp = (e.deltaY < 0)
+            isScrollingDown = (e.deltaY > 0)
+
+            clearTimeout(scrollTimeout)
+            scrollTimeout = setTimeout(() => {
+                isScrollingUp = false
+                isScrollingDown = false
+            }, 33.33)
+        })
+
+        let keys = {}
+        addEventListener('keydown', e => {
+            let key = e.key.toLowerCase()
+            inputMethod = 'keyboard'
+            keys[key] = true
+            if(['Tab'].includes(e.key)) {
+                e.preventDefault()
+            }
+        })
+        addEventListener('keyup', e => {
+            let key = e.key.toLowerCase()
+            keys[key] = false
+        })
+        
+        function clearInputState() {
+            keys = {}
+            leftMouseDown = false
+            middleMouseDown = false
+            rightMouseDown = false
+        }
+        addEventListener('blur', () => clearInputState())
+        document.addEventListener('visibilitychange', () => {if (document.hidden) clearInputState()})
+
+        animations = {
+            colorButton: {
+                type: 0, // 0 no animation, 1 is free spin, 2 is 90 deg spin
+                angle: 0,
+                progress: 1,
+                from: 0,
+                to: 0,
+
+                state: 0, // 0 idle, 1 accelerating, 2 decelleraintgjngg
+                speed: 0,
+                time: 0,
+                acceleration: 0,
+                lastCrossing: 0,
+            },
+            playButton: {
+                type: 0, // 0 no animation, 1 is free spin, 2 is 90 deg spin, 3 is wiggle
+                state: 0, // 0 idle, 1 accelerating, 2 decelleraintgjngg. this is why it's numbers, cuz i can't speel
+                result: 0, // 0 waiting green, 1 success green, 2 failed yellow, 3 waiting red
+                angle: 0,
+                speed: 0,
+                time: 0,
+            },
+            discordButton: {
+                type: 0, // 0 no animation, 1 is 360 spin
+                angle: 0,
+                progress: 1,
+            }
+        }
+        ui.menu.menuControls.colorButton.addEventListener('pointerdown', () => {
+            if (animations.colorButton.type == 1) return
+            playSound('bwooop', 1, randomFloat(0.9,1.1))
+            animations.colorButton.type = 2
+            animations.colorButton.to += 90
+            animations.colorButton.from = animations.colorButton.angle
+            animations.colorButton.progress = 0
+
+            playerColor = unlockedColors[(unlockedColors.indexOf(playerColor)+1)%unlockedColors.length]
+            ui.menu.menuControls.colorButton.style.setProperty('--c', `var(--${playerColor})`)
+            ui.menu.menuControls.colorButton.style.setProperty('--c-outline', `var(--${playerColor}-outline)`)
+        })
+        ui.menu.menuControls.playButton.addEventListener('pointerdown', () => {
+            if (animations.playButton.state != 0 && animations.playButton.result < 2) return
+            playSound('bwooop', 1, randomFloat(0.9,1.1))
+            animations.playButton.type = 1
+            animations.playButton.state = 1
+            animations.playButton.result = 0
+            animations.playButton.angle = 0
+            animations.playButton.speed = 0
+            animations.playButton.time = 0
+            playerSlot = undefined
+            pickServer()
+        })
+        ui.menu.bottomRow.discordButton.addEventListener('click', () => {
+            if (animations.discordButton.progress < 1) return
+            playSound('bwooop', 1, randomFloat(0.9,1.1))
+            animations.discordButton.type = 1
+            animations.discordButton.angle = 0
+            animations.discordButton.progress = 0
+            setTimeout(() => {
+                window.open('https://discord.gg/z2uZvEXfPx', '_blank')
+            }, 300)
+        })
+        ui.menu.shop.buyColor.addEventListener('click', () => {
+            if (animations.colorButton.type != 0) return
+            if (coins < colorPrice || remainingColors.length == 0) {
+                playSound('negativeaction')
+                return
+            }
+            coins -= colorPrice
+            animations.colorButton.type = 1
+            animations.colorButton.state = 1
+            animations.colorButton.result = 0
+            animations.colorButton.angle = 0
+            animations.colorButton.speed = 0
+            animations.colorButton.time = 0
+            animations.colorButton.acceleration = randomFloat(3.5, 4.0)
+            animations.colorButton.lastCrossing = 0
+        })
+
+        addEventListener('pointerdown', () => audio.resume(), {once: true})
+
+        // Firebase Listeners
+
+        database.ref("flingy2/lobbies").on("value", (snapshot) => {
+            servers = snapshot.val()
+        })
+        database.ref("flingy2/status").on("value", (snapshot) => {
+            statusMessage = snapshot.val()
+            if (statusMessage) {
+                ui.menu.status.textContent = statusMessage.text
+                ui.menu.status.style.setProperty('--c', `var(--${statusMessage.color})`)
+                ui.menu.status.style.setProperty('--c-outline', `var(--${statusMessage.color}-outline)`)
+            }
+        })
+
+        // Helper Functions
+
+        function isKeyPressed(key) {
+            return keys[key.toLowerCase()] == true
+        }
+
+        function randomInt(num1, num2) {return Math.floor(Math.random()*(Math.max(num1, num2)-Math.min(num1, num2)+1))+Math.min(num1, num2)}
+        function randomFloat(num1, num2) {return Math.random()*(Math.max(num1, num2)-Math.min(num1, num2))+Math.min(num1, num2)}
+
+
+        function playSound(name, volume = 1, pitch = 1) {
+            let buffer = soundBuffers[name]
+            if (!buffer) {console.warn(`missing sound ${name}`); return}
+            let source = audio.createBufferSource()
+            source.buffer = buffer
+            let gain = audio.createGain()
+            gain.gain.value = volume
+            source.playbackRate.value = pitch
+            source.connect(gain).connect(audio.destination)
+            source.start()
+        }
+
+        // Drawing Functions
+
+        function colorsToHex(color) {
+            switch (color) {
+                case 'red': return '#ff6666'
+                case 'coral': return '#ff9966'
+                case 'orange': return '#ffc266'
+                case 'yellow': return '#ffe766'
+                case 'lime': return '#87e65c'
+                case 'green': return '#71bf4d'
+                case 'blue': return '#6696ff'
+                case 'purple': return '#9966ff'
+                case 'pink': return '#fc66ff'
+                case 'tan': return '#ffccb3'
+                case 'navy': return '#4d71bf'
+                case 'brown': return '#bf734d'
+                case 'maroon': return '#bf4d4d'
+                case 'burgundy': return '#bf4d76'
+                case 'magenta': return '#ff66af'
+                case 'cyan': return '#5ce6e6'
+                case 'leaf': return '#5ce693'
+                case 'black': return '#333333'
+                case 'gray': return '#bfbfbf'
+                case 'white': return '#f2f2f2'
+                case 'special': {
+                    t = Date.now()/640
+                    start = [255,102,102]
+                    end = [255,128,166]
+                    factor = 0.5 + 0.5 * Math.sin(t)
+                    r = Math.round(start[0] + (end[0]-start[0])*factor)
+                    g = Math.round(start[1] + (end[1]-start[1])*factor)
+                    b = Math.round(start[2] + (end[2]-start[2])*factor)
+                    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
+                }
+                default: return '#ff00ff'
+            }
+        }
+
+        function colorsToOutlineHex(color) {
+            switch (color) {
+                case 'red': return '#bf4d4d'
+                case 'coral': return '#bf734d'
+                case 'orange': return '#bf914d'
+                case 'yellow': return '#bfad4d'
+                case 'lime': return '#62a642'
+                case 'green': return '#4b8033'
+                case 'blue': return '#4d71bf'
+                case 'purple': return '#734dbf'
+                case 'pink': return '#bd4dbf'
+                case 'tan': return '#bf9986'
+                case 'navy': return '#334b80'
+                case 'brown': return '#804d33'
+                case 'maroon': return '#803333'
+                case 'burgundy': return '#80334f'
+                case 'magenta': return '#bf4d84'
+                case 'cyan': return '#4dbfbf'
+                case 'leaf': return '#4dbf7a'
+                case 'black': return '#262626'
+                case 'gray': return '#999999'
+                case 'white': return '#bfbfbf'
+                case 'special': {
+                    t = Date.now()/640
+                    start = [191,77,77]
+                    end = [191,96,124]
+                    factor = 0.5 + 0.5 * Math.sin(t)
+                    r = Math.round(start[0] + (end[0]-start[0])*factor)
+                    g = Math.round(start[1] + (end[1]-start[1])*factor)
+                    b = Math.round(start[2] + (end[2]-start[2])*factor)
+                    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
+                }
+                default: return '#ff0000'
+            }
+        }
+
+        // Specific Functions
+        
+        function setKey(key, value, path = 'flingy2/lobbies') {
+            database.ref(`${path}/${key}`).set(value)
+        }
+
+        async function getKey(key, path = 'flingy2/lobbies') {
+            const snapshot = await database.ref(`${path}/${key}`).once('value')
+            return snapshot.val()
+        }
+
+        function setStoredKey(key, value) {
+            localStorage.setItem(key, value)
+        }
+
+        function getStoredKey(key) {
+            return localStorage.getItem(key) || ''
+        }
+
+        function pickServer() {
+            console.log(`Picking server...`)
+
+            let available = []
+
+            for (const id in servers) {
+                if (invalidServers[id]) continue
+                if (Date.now()-(servers[id].lastSeen || 0) > 10*60*1000) continue
+                if (servers[id].status != 0) continue
+                available.push({id: id, players: servers[id].playerCount || 0})
+            }
+
+            if (available.length == 0 && Object.keys(invalidServers).length) {
+                invalidServers = {}
+            }
+
+            if (available.length == 0) {
+                console.log("no joinable servers")
+                animations.playButton.result = Object.keys(servers || {}).length == 0 ? 2 : 3
+                playSound('negativeaction2')
+                ui.menu.message.textContent = `No joinable servers`
+                setTimeout(() => {
+                    animations.playButton.state = 2
+                }, 100)
+                // in the future, make it wait for a server to be available, since that's the point after all
+                return
+            }
+
+            available.sort((a,b) => b.players-a.players)
+
+            server = available[0]
+            connect(server.id, servers[server.id].url)
+        }
+
+        function connect(id, url) {
+            if (ws) ws.close()
+
+            console.log(`Connecting to server: ${id} (${url})`)
+            ws = new WebSocket(url)
+            ws.binaryType = "arraybuffer"
+            
+            ws.addEventListener('open', () => {
+                console.log(`Connected to websocket of server ${id} (${url})`)
+                ws.send(encodePacket(-1, id))
+            })
+
+            ws.addEventListener('message', (event) => {
+                decodePacket(event.data)
+            })
+
+            ws.addEventListener('close', (event) => {
+                console.log(`Disconnected from server ${id} (${url}) - Code: ${event.code}, Reason: ${event.reason}, WasClean: ${event.wasClean}`)
+            })
+
+            ws.addEventListener('error', () => {
+                console.log(`Connection error on server ${id} (${url})`)
+            })
+        }
+
+        function encodePacket(packetType, data) {
+            version = 1
+            switch (packetType) {
+                case -1: {
+                    let text = new TextEncoder().encode(data)
+
+                    let bufferSize = 2+1+text.length
+                    let buffer = new ArrayBuffer(bufferSize)
+                    let packet = new DataView(buffer)
+                    let i = 0
+                    packet.setUint8(i, version) ;i += 1
+                    packet.setInt8(i, packetType) ;i += 1
+
+                    packet.setUint8(i, text.length, true) ;i += 1
+                    for (let j=0; j < text.length; j++) {
+                        packet.setUint8(i+j, text[j])
+                    }
+                    i += text.length
+
+                    return packet
+                }
+                default: console.warn(`idk what packet ${packetType} is`) ;return null
+            }
+        }
+        
+        function decodePacket(data) {
+            let packet = new DataView(data)
+            let i = 0
+            let version = packet.getUint8(i) ;i += 1
+            if (version != 1) {console.warn(`outdated version ${version}, wtf!?`); return}
+            let packetType = packet.getInt8(i) ;i += 1
+            switch (packetType) {
+                case 1: {
+                    playerSlot = packet.getUint8(i) ;i += 1
+                    console.log(`Connected to lobby as player ${playerSlot}`)
+                    animations.playButton.result = 1
+                    playSound('matchfound')
+                    animations.playButton.state = 1
+                    setTimeout(() => {
+                        animations.playButton.state = 2
+                    }, 500)
+                } break
+                case 2: {
+                    disconnectReason = packet.getUint8(i) ;i += 1
+                    console.log(`Disconnected for reason ${disconnectReason}`)
+
+                    disconnectReasons = [
+                        `Lobby ${server.id.replace(/^flingy_/, '')} doesn't exist`,
+                        `Lobby ${server.id.replace(/^flingy_/, '')} is full`,
+                        `Duplicate connection to ${server.id.replace(/^flingy_/, '')}`,
+                    ]
+                    ui.menu.message.textContent = disconnectReasons[disconnectReason]
+
+                    animations.playButton.result = 2
+                    animations.playButton.state = 2
+                    playSound('negativeaction2')
+                    ws.close()
+                } break
+                default: console.warn(`idk what packet ${packetType} is`) ;break
+            }
+            
+        }
+
+        // init
+        server = null
+        servers = {}
+        invalidServers = {}
+        lobby = {
+            config: {},
+            tick: -1,
+            running: false,
+            closing: false,
+            player: [],
+        }
+        tips = [
+            "tip 1",
+            "tip 2",
+        ]
+        playerSlot = undefined
+        playerColor = 'red'
+        playerColors = ['red', 'coral', 'orange', 'yellow', 'lime', 'green', 'leaf', 'cyan', 'blue', 'navy', 'purple', 'magenta', 'pink', 'burgundy', 'maroon', 'brown', 'tan', 'white', 'gray', 'black']
+        unlockedColors = []
+        remainingColors = []
+        colorPrice = Infinity
+        ws = null
+        
+
+        // render loop
+        lastFrame = performance.now()
+
+        function frame(now) {
+            let dt = Math.min((now-lastFrame)/1000*30, 1.5)
+            lastFrame = now
+
+            // render shit
+
+            remainingColors = playerColors.filter(c => !unlockedColors.includes(c))
+            colorPrice = unlockedColors.length-3
+
+            ui.menu.shop.buyColor.classList.toggle('poor', coins < colorPrice)
+            ui.menu.shop.buyColor.classList.toggle('rich', coins >= colorPrice && remainingColors.length != 0)
+            ui.menu.shop.buyColor.classList.toggle('maxed', remainingColors.length == 0)
+            ui.menu.shop.flings.textContent = `Flings: ${coins}🪙`
+            
+            // button animations
+            switch (animations.colorButton.type) {
+                case 0: {
+                    ui.menu.shop.buyColor.textContent = `Buy Color: ${colorPrice}🪙`
+                    ui.menu.shop.buyColor.style.setProperty('--c', `var(--${remainingColors[Math.floor(Date.now()/1000)%remainingColors.length]})`)
+                    ui.menu.shop.buyColor.style.setProperty('--c-outline', `var(--${remainingColors[Math.floor(Date.now()/1000)%remainingColors.length]}-outline)`)
+                } break
+                case 1: {
+                    ui.menu.shop.buyColor.textContent = `Spinning...`
+                    switch (animations.colorButton.state) {
+                        case 1: {
+                            animations.colorButton.time += dt
+                            if (animations.colorButton.time >= 15) {
+                                animations.colorButton.state = 2
+                            }
+                            animations.colorButton.speed += animations.colorButton.acceleration*dt
+                            animations.colorButton.speed *= Math.pow(0.99, dt*2)
+                            animations.colorButton.angle += animations.colorButton.speed*dt
+                        } break
+                        case 2: {
+                            let threshold = 0.5
+                            animations.colorButton.speed *= Math.pow(0.99, dt*2)
+                            animations.colorButton.angle += animations.colorButton.speed*dt
+                            if (animations.colorButton.speed < threshold) {
+                                animations.colorButton.type = 0
+                                animations.colorButton.state = 0
+                                animations.colorButton.angle = 0
+                                animations.colorButton.speed = 0
+                                playerColor = remainingColors[animations.colorButton.result]
+                                unlockedColors.push(playerColor)
+                                unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
+                                playSound('bonus')
+                            }
+                        } break
+                    }
+
+                    let crossing = Math.floor(animations.colorButton.angle/90)
+                    if (crossing > animations.colorButton.lastCrossing) {
+                        if (remainingColors.length > 1) {
+                            let oldResult = animations.colorButton.result
+                            animations.colorButton.result = randomInt(0,remainingColors.length-2)
+                            if (animations.colorButton.result >= oldResult) animations.colorButton.result++
+                        }
+                        animations.colorButton.lastCrossing = crossing
+                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                    }
+
+                    ui.menu.menuControls.colorButton.style.setProperty('--angle', animations.colorButton.angle + 'deg')
+                    ui.menu.menuControls.colorButton.style.setProperty('--c', `var(--${remainingColors[animations.colorButton.result]})`)
+                    ui.menu.menuControls.colorButton.style.setProperty('--c-outline', `var(--${remainingColors[animations.colorButton.result]}-outline)`)
+                    ui.menu.shop.buyColor.style.setProperty('--c', `var(--${remainingColors[animations.colorButton.result]})`)
+                    ui.menu.shop.buyColor.style.setProperty('--c-outline', `var(--${remainingColors[animations.colorButton.result]}-outline)`)
+                    // also make the buy button the same color as this button!
+
+                } break
+                case 2: {
+                    if (animations.colorButton.progress < 1) {
+                        animations.colorButton.progress = Math.min(animations.colorButton.progress+dt/8, 1)
+                        animations.colorButton.angle = animations.colorButton.from+(animations.colorButton.to-animations.colorButton.from)*animations.colorButton.progress*animations.colorButton.progress*(3-2*animations.colorButton.progress)
+                        ui.menu.menuControls.colorButton.style.setProperty('--angle', animations.colorButton.angle + 'deg')
+                        if (animations.colorButton.progress >= 1) {animations.colorButton.angle = animations.colorButton.from = animations.colorButton.to = animations.colorButton.type = 0}
+                    }
+                } break
+            }
+
+            if (animations.playButton.state == 1) {
+                animations.playButton.time += dt
+                if (animations.playButton.time >= 3*30 && playerSlot == undefined) {
+                    animations.playButton.result = 2
+                    invalidServers[server.id] = true
+                    ui.menu.message.textContent = `failed to connect to ${server.id.replace(/^flingy_/, '')}`
+                    animations.playButton.state = 2
+                    playSound('negativeaction2')
+                    ws.close()
+                }
+                animations.playButton.speed += 3.58*dt
+                animations.playButton.speed *= Math.pow(0.905, dt)
+                animations.playButton.angle += animations.playButton.speed*dt
+                ui.menu.menuControls.playButton.style.setProperty('--angle', animations.playButton.angle + 'deg')
+            } else if (animations.playButton.state == 2) {
+                let threshold = 0.1
+                animations.playButton.speed *= (Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle)/(Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle+(animations.playButton.speed-threshold)*dt)
+                animations.playButton.angle += animations.playButton.speed*dt
+                if (animations.playButton.speed < threshold) {
+                    animations.playButton.state = 0
+                    animations.playButton.angle = 0
+                    animations.playButton.speed = 0
+                    if (animations.playButton.result == 1) {animations.playButton.result = 0}
+                }
+                ui.menu.menuControls.playButton.style.setProperty('--angle', animations.playButton.angle + 'deg')
+            }
+            ui.menu.menuControls.playButton.classList.toggle('waiting', animations.playButton.result === 3)
+            ui.menu.menuControls.playButton.classList.toggle('retry', animations.playButton.result === 2)
+            ui.menu.menuControls.playButton.classList.toggle('finished', animations.playButton.result === 1)
+
+            if (animations.discordButton.progress < 1) {
+                animations.discordButton.progress = Math.min(animations.discordButton.progress+dt/9, 1)
+                animations.discordButton.angle = 180*animations.discordButton.progress*animations.discordButton.progress*(3-2*animations.discordButton.progress)
+                ui.menu.bottomRow.discordButton.style.setProperty('--angle', animations.discordButton.angle + 'deg')
+                if (animations.discordButton.progress >= 1) {animations.discordButton.angle = 0}
+            }
+
+            requestAnimationFrame(frame)
+        }
+
+        function localStorageLoop() {
+            storageVersion = getStoredKey('flingy_v2_version') || ''
+            if (storageVersion == 'v2.0.0+') {
+                // load existing data
+                console.log(`loading save data (${storageVersion})`)
+
+                username = getStoredKey('flingy_v2_username')
+                if (username) {ui.menu.menuControls.username.value = username}
+
+                try {unlockedColors = JSON.parse(getStoredKey('flingy_v2_unlockedColors'))} catch(e) {unlockedColors = null}
+                if (!unlockedColors || !unlockedColors.length) unlockedColors = ['red', 'orange', 'lime', 'blue']
+                unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
+                
+                playerColor = getStoredKey('flingy_v2_playerColor') || unlockedColors[Math.floor(Math.random()*unlockedColors.length)]
+                if (!unlockedColors.includes(playerColor)) {playerColor = unlockedColors[Math.floor(Math.random()*unlockedColors.length)]}
+            
+                coins = Number(getStoredKey('flingy_v2_coins')) || 0
+            } else if (getStoredKey('flingy_username') != '') {
+                // migrate from v1.1.3 // so far they voted to start fresh, so only username.
+                console.log(`migrating save data from old flingy.io v1.1.3 (username only)`)
+
+                username = getStoredKey('flingy_username') || ''
+                if (username) {ui.menu.menuControls.username.value = username}
+
+                //try {unlockedColors = JSON.parse(getStoredKey('flingy_unlockedColors'))} catch(e) {unlockedColors = null}
+                //if (!unlockedColors || !unlockedColors.length) unlockedColors = ['red', 'orange', 'lime', 'blue']
+                //unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
+                
+                //playerColor = getStoredKey('flingy_playerColor') || unlockedColors[Math.floor(Math.random()*unlockedColors.length)]
+                //if (!unlockedColors.includes(playerColor)) {playerColor = unlockedColors[Math.floor(Math.random()*unlockedColors.length)]}
+                
+                //coins = Number(getStoredKey('flingy_coins')) || 0
+            } else {
+                // truly new user
+                console.log(`creating new save data (${storageVersion})`)
+                username = ''
+                unlockedColors = ['red', 'orange', 'lime', 'blue']
+                unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
+                playerColor = unlockedColors[Math.floor(Math.random()*unlockedColors.length)]
+                coins = 0
+            }
+            ui.menu.menuControls.colorButton.style.setProperty('--c', `var(--${playerColor})`)
+            ui.menu.menuControls.colorButton.style.setProperty('--c-outline', `var(--${playerColor}-outline)`)
+
+            setInterval(() => {
+                setStoredKey('flingy_v2_version', 'v2.0.0+')
+                setStoredKey('flingy_v2_username', ui.menu.menuControls.username.value || 'unnamed')
+                setStoredKey('flingy_v2_coins', coins.toString())
+                setStoredKey('flingy_v2_playerColor', playerColor)
+                setStoredKey('flingy_v2_unlockedColors', JSON.stringify(unlockedColors))
+            }, 3000)
+        }
+
+        async function loadSounds() {
+            for (let name of soundNames) {
+                try {
+                    let response = await fetch(`sounds/${name}.ogg`)
+                    soundBuffers[name] = await audio.decodeAudioData(await response.arrayBuffer())
+                } catch (e) {
+                    console.warn(`couldn't load ${bame}`, e)
+                }
+            }
+            console.log(`loaded ${Object.keys(soundBuffers).length} sounds`)
+        }
+
+        requestAnimationFrame(frame)
+        localStorageLoop()
+        loadSounds()
+    </script>
+</body>
+</html>

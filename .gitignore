@@ -1,0 +1,7 @@
+# secrets
+serviceAccountKey.json
+firebase-keys.json
+.env
+
+# build output
+/flingy

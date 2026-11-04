@@ -1,0 +1,4 @@
+[
+    {"ID": "flingy_ffa_", "Name": "FFA", "PlayerLimit": 8, "borderSize": 640, "matchTime": 217, "countdownTime": 15, "botSpinSpeed": 120, "botAccuracy": 250, "botPercentage": 0.5, "addMoney": true},
+    {"ID": "flingy_ffa_", "Name": "FFA", "PlayerLimit": 8, "borderSize": 640, "matchTime": 217, "countdownTime": 15, "botSpinSpeed": 120, "botAccuracy": 250, "botPercentage": 0.5, "addMoney": true}
+]
