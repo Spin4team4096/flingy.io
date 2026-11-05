@@ -31,6 +31,7 @@
             justify-content: center;
             z-index: 10;
             background: rgba(0,0,0,0.2);
+            border-radius: 0;
         }
 
         #logo {
@@ -264,11 +265,14 @@
         }
 
         #tips {
-
-        }
-
-        #overlay {
-
+            position: absolute;
+            bottom: calc(12px*var(--ui));
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: calc(24px*var(--ui));
+            color: #000000;
+            transition: opacity 1s;
+            white-space: nowrap;
         }
 
         .icon {
@@ -509,11 +513,21 @@
                 speed: 0,
                 time: 0,
             },
-            discordButton: {
-                type: 0, // 0 no animation, 1 is 360 spin
+            settingsButton: {
+                type: 0, // 0 no animation, 1 is 90 spin clockwise, 2 is 90 spin anticlockwise
                 angle: 0,
                 progress: 1,
-            }
+            },
+            changelogButton: {
+                type: 0, // 0 no animation, 1 is 90 spin clockwise, 2 is 90 spin anticlockwise
+                angle: 0,
+                progress: 1,
+            },
+            discordButton: {
+                type: 0, // 0 no animation, 1 is 180 spin
+                angle: 0,
+                progress: 1,
+            },
         }
         ui.menu.menuControls.colorButton.addEventListener('pointerdown', () => {
             if (animations.colorButton.type == 1) return
@@ -538,6 +552,22 @@
             animations.playButton.time = 0
             playerSlot = undefined
             pickServer()
+        })
+        ui.menu.bottomRow.settingsButton.addEventListener('pointerdown', () => {
+            if (animations.settingsButton.progress < 1) return
+            settingsOpen = !settingsOpen
+            playSound('bwooop', 1, settingsOpen == true ? 1.1 : 0.9)
+            animations.settingsButton.type = settingsOpen == true ? 1 : 2
+            animations.settingsButton.angle = 0
+            animations.settingsButton.progress = 0
+        })
+        ui.menu.bottomRow.changelogButton.addEventListener('pointerdown', () => {
+            if (animations.changelogButton.progress < 1) return
+            changelogOpen = !changelogOpen
+            playSound('bwooop', 1, changelogOpen == true ? 1.1 : 0.9)
+            animations.changelogButton.type = changelogOpen == true ? 1 : 2
+            animations.changelogButton.angle = 0
+            animations.changelogButton.progress = 0
         })
         ui.menu.bottomRow.discordButton.addEventListener('click', () => {
             if (animations.discordButton.progress < 1) return
@@ -735,6 +765,7 @@
             if (ws) ws.close()
 
             console.log(`Connecting to server: ${id} (${url})`)
+            ui.menu.message.textContent = `Connecting to lobby ${server.id.replace(/^flingy_/, '')}`
             ws = new WebSocket(url)
             ws.binaryType = "arraybuffer"
             
@@ -791,6 +822,7 @@
                 case 1: {
                     playerSlot = packet.getUint8(i) ;i += 1
                     console.log(`Connected to lobby as player ${playerSlot}`)
+                    ui.menu.message.textContent = `Connected to lobby ${server.id.replace(/^flingy_/, '')}`
                     animations.playButton.result = 1
                     playSound('matchfound')
                     animations.playButton.state = 1
@@ -802,13 +834,13 @@
                     disconnectReason = packet.getUint8(i) ;i += 1
                     console.log(`Disconnected for reason ${disconnectReason}`)
 
-                    disconnectReasons = [
-                        `Lobby ${server.id.replace(/^flingy_/, '')} doesn't exist`,
-                        `Lobby ${server.id.replace(/^flingy_/, '')} is full`,
-                        `Duplicate connection to ${server.id.replace(/^flingy_/, '')}`,
-                    ]
+                    if (disconnectReason == 1) invalidServers[server.id] = true
+                    disconnectReasons = {
+                        1: `Lobby ${server.id.replace(/^flingy_/, '')} doesn't exist`,
+                        2: `Lobby ${server.id.replace(/^flingy_/, '')} is full`,
+                        3: `Duplicate connection to ${server.id.replace(/^flingy_/, '')}`,
+                    }
                     ui.menu.message.textContent = disconnectReasons[disconnectReason]
-
                     animations.playButton.result = 2
                     animations.playButton.state = 2
                     playSound('negativeaction2')
@@ -831,8 +863,8 @@
             player: [],
         }
         tips = [
-            "tip 1",
-            "tip 2",
+            "this is a very short tip",
+            "this is a very long tip and it's very informative",
         ]
         playerSlot = undefined
         playerColor = 'red'
@@ -840,6 +872,8 @@
         unlockedColors = []
         remainingColors = []
         colorPrice = Infinity
+        changelogOpen = false
+        settingsOpen = false
         ws = null
         
 
@@ -955,6 +989,18 @@
             ui.menu.menuControls.playButton.classList.toggle('retry', animations.playButton.result === 2)
             ui.menu.menuControls.playButton.classList.toggle('finished', animations.playButton.result === 1)
 
+            if (animations.settingsButton.progress < 1) {
+                animations.settingsButton.progress = Math.min(animations.settingsButton.progress+dt/9, 1)
+                animations.settingsButton.angle = (3-2*animations.settingsButton.type)*90*animations.settingsButton.progress*animations.settingsButton.progress*(3-2*animations.settingsButton.progress)
+                ui.menu.bottomRow.settingsButton.style.setProperty('--angle', animations.settingsButton.angle + 'deg')
+                if (animations.settingsButton.progress >= 1) {animations.settingsButton.angle = 0}
+            }
+            if (animations.changelogButton.progress < 1) {
+                animations.changelogButton.progress = Math.min(animations.changelogButton.progress+dt/9, 1)
+                animations.changelogButton.angle = (3-2*animations.changelogButton.type)*90*animations.changelogButton.progress*animations.changelogButton.progress*(3-2*animations.changelogButton.progress)
+                ui.menu.bottomRow.changelogButton.style.setProperty('--angle', animations.changelogButton.angle + 'deg')
+                if (animations.changelogButton.progress >= 1) {animations.changelogButton.angle = 0}
+            }
             if (animations.discordButton.progress < 1) {
                 animations.discordButton.progress = Math.min(animations.discordButton.progress+dt/9, 1)
                 animations.discordButton.angle = 180*animations.discordButton.progress*animations.discordButton.progress*(3-2*animations.discordButton.progress)
@@ -1033,6 +1079,18 @@
         requestAnimationFrame(frame)
         localStorageLoop()
         loadSounds()
+
+        tipIndex = 0
+        ui.menu.tips.textContent = tips[tipIndex]
+        ui.menu.tips.style.opacity = 1
+        setInterval(() => {
+            ui.menu.tips.style.opacity = 0
+            setTimeout(() => {
+                tipIndex = (tipIndex+1)%tips.length
+                ui.menu.tips.textContent = tips[tipIndex]
+                ui.menu.tips.style.opacity = 1
+            }, 1000)
+        }, 10000)
     </script>
 </body>
 </html>
