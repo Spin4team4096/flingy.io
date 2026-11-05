@@ -8,6 +8,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
+        :root {
+            /*--ui: 1;*/
+        }
         * {
             box-sizing: border-box;
             border-radius: calc(8px*var(--ui));
@@ -271,7 +274,7 @@
             transform: translateX(-50%);
             font-size: calc(24px*var(--ui));
             color: #000000;
-            transition: opacity 1s;
+            transition: opacity calc(1s*var(--transition, 1));
             white-space: nowrap;
         }
 
@@ -280,6 +283,30 @@
             height: calc(44px*var(--ui));
             display: block;
             stroke-width: 3;
+        }
+
+        #settings-panel, #changelog-panel {
+            position: fixed;
+            top: calc(12px*var(--ui));
+            left: calc(-450px*var(--ui));
+            bottom: calc(88px*var(--ui));
+            width: calc(450px*var(--ui));
+            transition: left calc(0.25s*var(--transition, 1));
+            padding: calc(12px*var(--ui));
+            overflow-y: auto;
+            z-index: 20;
+            &.open {left: calc(12px*var(--ui));}
+        }
+
+        #settings-panel {
+            background: var(--gray);
+            border: calc(6px*var(--ui)) solid var(--gray-outline);
+            outline: var(--gray-outline);
+        }
+        #changelog-panel {
+            background: var(--orange);
+            border: calc(6px*var(--ui)) solid var(--orange-outline);
+            outline: var(--orange-outline);
         }
     </style>
 </head>
@@ -326,14 +353,13 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-leave"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
         </button>
     </div>
-    <div id="settings">
-        <div id="settings-panel"></div>
-    </div>
+    <div id="settings-panel"></div>
+    <div id="changelog-panel"></div>
     <script>
         // TODO:
         // - everything
 
-        if (window.location.hostname == 'flingy.io') {
+        if (window.location.hostname == 'flingy.io' ||window.location.hostname == 'beta.flingy.io') {
             console.log('%c🔴🔴🔴 YOU\'RE ON THE NON-LOCAL VERSION THAT\'S PUSHED ONLINE (may be outdated)🔴🔴🔴', 'background: rgba(255,0,0,0.5); color: black; font-size: 16px; font-weight: bold; padding: 4px;')
         } else {
             console.log('%c✅ You\'re local, all good', 'background: rgba(0,255,0,0.2); color: black; font-size: 16px; padding: 4px;')
@@ -343,6 +369,8 @@
 
         // Sound Setup
         let audio = new AudioContext()
+        masterGain = audio.createGain()
+        masterGain.connect(audio.destination)
         let soundBuffers = {}
         let soundNames = ['achievementmc','bonus','bwooop','eliminated','gamestart','hit1','hit2','lose','matchfound','negativeaction','negativeaction2','ping','pointsadd','sling','success','throw','uiclick','uiclick2','uipopup','uipopup2','uipopupclose','victory']
 
@@ -361,7 +389,6 @@
 
         const canvas = document.getElementById('game')
         const ctx = canvas.getContext('2d')
-        resize()
 
         ui = {
             menu: {
@@ -390,9 +417,8 @@
                 leaderboard: document.getElementById('leaderboard'),
                 leave: document.getElementById('leave'),
             },
-            settings: {
-                panel: document.getElementById('settings-panel'),
-            },
+            settings: document.getElementById('settings-panel'),
+            changelog: document.getElementById('changelog-panel'),
         }
 
         // Firebase Setup
@@ -426,7 +452,7 @@
             canvas.height = innerHeight
 
             scale = Math.max(canvas.width/(fov*16/9), canvas.height/fov)
-            uiScale = scale/Math.max(1920/(fov*16/9), 1080/fov)
+            uiScale = scale/Math.max(1920/(fov*16/9), 1080/fov)*settings.uiScale
 
             document.documentElement.style.setProperty('--ui', uiScale)
         }
@@ -435,7 +461,7 @@
             mouseX = e.clientX-innerWidth/2
             mouseY = e.clientY-innerHeight/2
         })
-        canvas.addEventListener('mousedown', e => {
+        addEventListener('mousedown', e => {
             if (e.button === 0) {
                 leftMouseDown = true
             } else if (e.button === 1) {
@@ -444,7 +470,7 @@
                 rightMouseDown = true
             }
         })
-        canvas.addEventListener('mouseup', e => {
+        addEventListener('mouseup', e => {
             if (e.button === 0) {
                 leftMouseDown = false
             } else if (e.button === 1) {
@@ -453,10 +479,11 @@
                 rightMouseDown = false
             }
         })
-        canvas.addEventListener('contextmenu', e => {e.preventDefault()})
+        addEventListener('contextmenu', e => e.preventDefault())
 
         let scrollTimeout
-        canvas.addEventListener('wheel', (e) => {
+        addEventListener('wheel', (e) => {
+            if (e.target.closest('#settings-panel, #changelog-panel')) return
             e.preventDefault()
             isScrollingUp = (e.deltaY < 0)
             isScrollingDown = (e.deltaY > 0)
@@ -554,16 +581,30 @@
             pickServer()
         })
         ui.menu.bottomRow.settingsButton.addEventListener('pointerdown', () => {
-            if (animations.settingsButton.progress < 1) return
-            settingsOpen = !settingsOpen
-            playSound('bwooop', 1, settingsOpen == true ? 1.1 : 0.9)
-            animations.settingsButton.type = settingsOpen == true ? 1 : 2
+            settingsPage = settingsPage != 0 ? 0 : 1
+            ui.settings.classList.toggle('open', settingsPage != 0)
+            if (changelogOpen) {
+                changelogOpen = !changelogOpen
+                ui.changelog.classList.toggle('open', changelogOpen)
+                animations.changelogButton.type = changelogOpen == true ? 1 : 2
+                animations.changelogButton.angle = 0
+                animations.changelogButton.progress = 0
+            }
+            playSound('bwooop', 1, settingsPage != 0 ? 1.1 : 0.9)
+            animations.settingsButton.type = settingsPage != 0 ? 1 : 2
             animations.settingsButton.angle = 0
             animations.settingsButton.progress = 0
         })
         ui.menu.bottomRow.changelogButton.addEventListener('pointerdown', () => {
-            if (animations.changelogButton.progress < 1) return
             changelogOpen = !changelogOpen
+            ui.changelog.classList.toggle('open', changelogOpen)
+            if (settingsPage != 0) {
+                settingsPage = settingsPage != 0 ? 0 : 1
+                ui.settings.classList.toggle('open', settingsPage != 0)
+                animations.settingsButton.type = settingsPage != 0 ? 1 : 2
+                animations.settingsButton.angle = 0
+                animations.settingsButton.progress = 0
+            }
             playSound('bwooop', 1, changelogOpen == true ? 1.1 : 0.9)
             animations.changelogButton.type = changelogOpen == true ? 1 : 2
             animations.changelogButton.angle = 0
@@ -577,7 +618,7 @@
             animations.discordButton.progress = 0
             setTimeout(() => {
                 window.open('https://discord.gg/z2uZvEXfPx', '_blank')
-            }, 300)
+            }, 300*settings.transitionSpeed)
         })
         ui.menu.shop.buyColor.addEventListener('click', () => {
             if (animations.colorButton.type != 0) return
@@ -630,7 +671,7 @@
             let gain = audio.createGain()
             gain.gain.value = volume
             source.playbackRate.value = pitch
-            source.connect(gain).connect(audio.destination)
+            source.connect(gain).connect(masterGain)
             source.start()
         }
 
@@ -863,9 +904,26 @@
             player: [],
         }
         tips = [
-            "this is a very short tip",
-            "this is a very long tip and it's very informative",
+            "DRINK WATER",
+            "Spin to grow your flail!",
+            "Flails get harder to turn the heavier they get.",
+            "Left click to release your flail!",
+            //"Press I/F to show debug or fps/ping",
+            "Don't spin too fast! or you'll wrap back around the other way.",
+            "Each kill gives 1 fling. Spend them to unlock colors!",
+            "<-- Flex your fling count in the DISCORD!",
+            "SPIN SPIN SPIN SPIN SPIN SPIN SPIN SPIN",
+            "I am super proud of this UI :D",
+            "This game was NOT vibe-coded.",
         ]
+        settings = {
+            uiScale: 1,
+            volume: 1,
+            transitionSpeed: 1,
+            spinSpeed: 1,
+            showLeaderboard: true,
+            showMinimap: true,
+        }
         playerSlot = undefined
         playerColor = 'red'
         playerColors = ['red', 'coral', 'orange', 'yellow', 'lime', 'green', 'leaf', 'cyan', 'blue', 'navy', 'purple', 'magenta', 'pink', 'burgundy', 'maroon', 'brown', 'tan', 'white', 'gray', 'black']
@@ -873,10 +931,11 @@
         remainingColors = []
         colorPrice = Infinity
         changelogOpen = false
-        settingsOpen = false
+        settingsPage = 0
         menuBgX = 0
         menuBgY = 0
         ws = null
+        resize()
         
 
         // render loop
@@ -918,22 +977,23 @@
                     ui.menu.shop.buyColor.textContent = `Spinning...`
                     switch (animations.colorButton.state) {
                         case 1: {
-                            animations.colorButton.time += dt
+                            animations.colorButton.time += dt/settings.spinSpeed
                             if (animations.colorButton.time >= 15) {
                                 animations.colorButton.state = 2
                             }
-                            animations.colorButton.speed += animations.colorButton.acceleration*dt
-                            animations.colorButton.speed *= Math.pow(0.98, dt)
-                            animations.colorButton.angle += animations.colorButton.speed*dt
+                            animations.colorButton.speed += animations.colorButton.acceleration*dt/settings.spinSpeed
+                            animations.colorButton.speed *= Math.pow(0.98, dt/settings.spinSpeed)
+                            animations.colorButton.angle += animations.colorButton.speed*dt/settings.spinSpeed
                         } break
                         case 2: {
-                            let threshold = 0.5
-                            animations.colorButton.speed *= Math.pow(0.98, dt)
-                            animations.colorButton.angle += animations.colorButton.speed*dt
+                            let threshold = 0.25
+                            animations.colorButton.speed *= Math.pow(0.98, dt/settings.spinSpeed)
+                            animations.colorButton.angle += animations.colorButton.speed*dt/settings.spinSpeed
                             if (animations.colorButton.speed < threshold) {
-                                animations.colorButton.type = 0
-                                animations.colorButton.state = 0
-                                animations.colorButton.angle = 0
+                                animations.colorButton.type = 2
+                                animations.colorButton.from = animations.colorButton.angle
+                                animations.colorButton.to = Math.round(animations.colorButton.angle/90)*90
+                                animations.colorButton.progress = 0
                                 animations.colorButton.speed = 0
                                 playerColor = remainingColors[animations.colorButton.result]
                                 unlockedColors.push(playerColor)
@@ -964,7 +1024,7 @@
                 } break
                 case 2: {
                     if (animations.colorButton.progress < 1) {
-                        animations.colorButton.progress = Math.min(animations.colorButton.progress+dt/8, 1)
+                        animations.colorButton.progress = Math.min(animations.colorButton.progress+dt/(7.5*settings.transitionSpeed), 1)
                         animations.colorButton.angle = animations.colorButton.from+(animations.colorButton.to-animations.colorButton.from)*animations.colorButton.progress*animations.colorButton.progress*(3-2*animations.colorButton.progress)
                         ui.menu.menuControls.colorButton.style.setProperty('--angle', animations.colorButton.angle + 'deg')
                         if (animations.colorButton.progress >= 1) {animations.colorButton.angle = animations.colorButton.from = animations.colorButton.to = animations.colorButton.type = 0}
@@ -972,50 +1032,57 @@
                 } break
             }
 
-            if (animations.playButton.state == 1) {
-                animations.playButton.time += dt
-                if (animations.playButton.time >= 3*30 && playerSlot == undefined) {
-                    animations.playButton.result = 2
-                    invalidServers[server.id] = true
-                    ui.menu.message.textContent = `failed to connect to ${server.id.replace(/^flingy_/, '')}`
-                    animations.playButton.state = 2
-                    playSound('negativeaction2')
-                    ws.close()
-                }
-                animations.playButton.speed += 3.58*dt
-                animations.playButton.speed *= Math.pow(0.905, dt)
-                animations.playButton.angle += animations.playButton.speed*dt
-                ui.menu.menuControls.playButton.style.setProperty('--angle', animations.playButton.angle + 'deg')
-            } else if (animations.playButton.state == 2) {
-                let threshold = 0.1
-                animations.playButton.speed *= (Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle)/(Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle+(animations.playButton.speed-threshold)*dt)
-                animations.playButton.angle += animations.playButton.speed*dt
-                if (animations.playButton.speed < threshold) {
-                    animations.playButton.state = 0
-                    animations.playButton.angle = 0
-                    animations.playButton.speed = 0
-                    if (animations.playButton.result == 1) {animations.playButton.result = 0}
-                }
-                ui.menu.menuControls.playButton.style.setProperty('--angle', animations.playButton.angle + 'deg')
+            switch (animations.playButton.type) {
+                case 1: {
+                    switch (animations.playButton.state) {
+                        case 1: {
+                            animations.playButton.time += dt
+                            if (animations.playButton.time >= 3*30 && playerSlot == undefined) {
+                                animations.playButton.result = 2
+                                invalidServers[server.id] = true
+                                ui.menu.message.textContent = `failed to connect to ${server.id.replace(/^flingy_/, '')}`
+                                animations.playButton.state = 2
+                                playSound('negativeaction2')
+                                ws.close()
+                            }
+                            animations.playButton.speed += 3.58*dt/settings.spinSpeed
+                            animations.playButton.speed *= Math.pow(0.905, dt/settings.spinSpeed)
+                            animations.playButton.angle += animations.playButton.speed*dt/settings.spinSpeed
+                        } break
+                        case 2: {
+                            let threshold = 0.1
+                            animations.playButton.speed *= (Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle)/(Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle+(animations.playButton.speed-threshold)*dt/settings.spinSpeed)
+                            animations.playButton.angle += animations.playButton.speed*dt/settings.spinSpeed
+                            if (animations.playButton.speed < threshold) {
+                                animations.playButton.type = 0
+                                animations.playButton.state = 0
+                                animations.playButton.angle = 0
+                                animations.playButton.speed = 0
+                                if (animations.playButton.result == 1) {animations.playButton.result = 0}
+                            }
+                        } break
+                    }
+                    ui.menu.menuControls.playButton.style.setProperty('--angle', animations.playButton.angle + 'deg')
+                } break
             }
             ui.menu.menuControls.playButton.classList.toggle('waiting', animations.playButton.result === 3)
             ui.menu.menuControls.playButton.classList.toggle('retry', animations.playButton.result === 2)
             ui.menu.menuControls.playButton.classList.toggle('finished', animations.playButton.result === 1)
 
             if (animations.settingsButton.progress < 1) {
-                animations.settingsButton.progress = Math.min(animations.settingsButton.progress+dt/9, 1)
+                animations.settingsButton.progress = Math.min(animations.settingsButton.progress+dt/(7.5*settings.transitionSpeed), 1)
                 animations.settingsButton.angle = (3-2*animations.settingsButton.type)*90*animations.settingsButton.progress*animations.settingsButton.progress*(3-2*animations.settingsButton.progress)
                 ui.menu.bottomRow.settingsButton.style.setProperty('--angle', animations.settingsButton.angle + 'deg')
                 if (animations.settingsButton.progress >= 1) {animations.settingsButton.angle = 0}
             }
             if (animations.changelogButton.progress < 1) {
-                animations.changelogButton.progress = Math.min(animations.changelogButton.progress+dt/9, 1)
+                animations.changelogButton.progress = Math.min(animations.changelogButton.progress+dt/(7.5*settings.transitionSpeed), 1)
                 animations.changelogButton.angle = (3-2*animations.changelogButton.type)*90*animations.changelogButton.progress*animations.changelogButton.progress*(3-2*animations.changelogButton.progress)
                 ui.menu.bottomRow.changelogButton.style.setProperty('--angle', animations.changelogButton.angle + 'deg')
                 if (animations.changelogButton.progress >= 1) {animations.changelogButton.angle = 0}
             }
             if (animations.discordButton.progress < 1) {
-                animations.discordButton.progress = Math.min(animations.discordButton.progress+dt/9, 1)
+                animations.discordButton.progress = Math.min(animations.discordButton.progress+dt/(7.5*settings.transitionSpeed), 1)
                 animations.discordButton.angle = 180*animations.discordButton.progress*animations.discordButton.progress*(3-2*animations.discordButton.progress)
                 ui.menu.bottomRow.discordButton.style.setProperty('--angle', animations.discordButton.angle + 'deg')
                 if (animations.discordButton.progress >= 1) {animations.discordButton.angle = 0}
@@ -1041,6 +1108,9 @@
                 if (!unlockedColors.includes(playerColor)) {playerColor = unlockedColors[Math.floor(Math.random()*unlockedColors.length)]}
             
                 coins = Number(getStoredKey('flingy_v2_coins')) || 0
+
+                try {Object.assign(settings, JSON.parse(getStoredKey('flingy_v2_settings') || '{}'))} catch {}
+                loadSettings()
             } else if (getStoredKey('flingy_username') != '') {
                 // migrate from v1.1.3 // so far they voted to start fresh, so only username.
                 console.log(`migrating save data from old flingy.io v1.1.3 (username only)`)
@@ -1074,11 +1144,15 @@
                 setStoredKey('flingy_v2_coins', coins.toString())
                 setStoredKey('flingy_v2_playerColor', playerColor)
                 setStoredKey('flingy_v2_unlockedColors', JSON.stringify(unlockedColors))
+                setStoredKey('flingy_v2_settings', JSON.stringify(settings))
             }, 3000)
         }
 
         menuBgImg = new Image()
         menuBgImg.src = 'images/menubackground.png'
+
+        changelogData = []
+        fetch('changelog.json').then(r => r.json()).then(d => changelogData = d)
 
         async function loadSounds() {
             for (let name of soundNames) {
@@ -1086,10 +1160,16 @@
                     let response = await fetch(`sounds/${name}.ogg`)
                     soundBuffers[name] = await audio.decodeAudioData(await response.arrayBuffer())
                 } catch (e) {
-                    console.warn(`couldn't load ${bame}`, e)
+                    console.warn(`couldn't load ${name}`, e)
                 }
             }
             console.log(`loaded ${Object.keys(soundBuffers).length} sounds`)
+        }
+
+        function loadSettings() {
+            resize()
+            masterGain.gain.value = settings.volume
+            document.documentElement.style.setProperty('--transition', settings.transitionSpeed)
         }
 
         requestAnimationFrame(frame)
@@ -1105,7 +1185,7 @@
                 tipIndex = (tipIndex+1)%tips.length
                 ui.menu.tips.textContent = tips[tipIndex]
                 ui.menu.tips.style.opacity = 1
-            }, 1000)
+            }, 1000*settings.transitionSpeed)
         }, 10000)
     </script>
 </body>

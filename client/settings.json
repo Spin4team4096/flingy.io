@@ -1,0 +1,23 @@
+{
+    "1": {"title": "Settings", "children": [
+        {"type": "button", "label": "General Settings", "page": 2, "heightPercent": 20},
+        {"type": "button", "label": "Theme Settings", "page": 3, "heightPercent": 20},
+        {"type": "button", "label": "Keybind Settings", "page": 4, "heightPercent": 20}
+    ]},
+    "2": {"title": "General Settings", "children": [
+        {"type": "section", "label": "Interface", "children": [
+            {"type": "slider", "label": "UI Scale", "setting": "uiScale", "min": 0.25, "max": 2, "step": 0.05},
+            {"type": "slider", "label": "Transition Time", "setting": "transitionSpeed", "min": 0, "max": 2, "step": 0.05},
+            {"type": "slider", "label": "Spin Time", "setting": "spinSpeed", "min": 0.25, "max": 2, "step": 0.05}
+        ]},
+        {"type": "section", "label": "HUD", "children": [
+            {"type": "toggle", "label": "Show Leaderboard", "setting": "showLeaderboard"},
+            {"type": "toggle", "label": "Show Minimap", "setting": "showMinimap"}
+        ]},
+        {"type": "section", "label": "Sounds", "children": [
+            {"type": "slider", "label": "Volume", "setting": "volume", "min": 0, "max": 1, "step": 0.05}
+        ]}
+    ]},
+    "3": {"title": "Theme Settings", "children": []},
+    "4": {"title": "Keybind Settings", "children": []}
+}
