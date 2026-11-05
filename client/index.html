@@ -431,9 +431,9 @@
             document.documentElement.style.setProperty('--ui', uiScale)
         }
 
-        canvas.addEventListener('mousemove', e => {
-            mouseX = e.offsetX - canvas.width/2
-            mouseY = e.offsetY - canvas.height/2
+        addEventListener('mousemove', e => {
+            mouseX = e.clientX-innerWidth/2
+            mouseY = e.clientY-innerHeight/2
         })
         canvas.addEventListener('mousedown', e => {
             if (e.button === 0) {
@@ -874,6 +874,8 @@
         colorPrice = Infinity
         changelogOpen = false
         settingsOpen = false
+        menuBgX = 0
+        menuBgY = 0
         ws = null
         
 
@@ -885,6 +887,17 @@
             lastFrame = now
 
             // render shit
+
+            menuBgX += (-mouseX*0.03-menuBgX)*(1-Math.pow(0.64,dt))
+            menuBgY += (-mouseY*0.03-menuBgY)*(1-Math.pow(0.64,dt))
+            if (menuBgImg.complete && menuBgImg.naturalWidth) {
+                let ratio = menuBgImg.width/menuBgImg.height
+                let dw = Math.max(canvas.width, canvas.height*ratio)*1.1
+                let dh = dw/ratio
+                ctx.drawImage(menuBgImg, canvas.width/2-dw/2+menuBgX, canvas.height/2-dh/2+menuBgY, dw, dh)
+            }
+
+            // html ui
 
             remainingColors = playerColors.filter(c => !unlockedColors.includes(c))
             colorPrice = unlockedColors.length-3
@@ -910,12 +923,12 @@
                                 animations.colorButton.state = 2
                             }
                             animations.colorButton.speed += animations.colorButton.acceleration*dt
-                            animations.colorButton.speed *= Math.pow(0.99, dt*2)
+                            animations.colorButton.speed *= Math.pow(0.98, dt)
                             animations.colorButton.angle += animations.colorButton.speed*dt
                         } break
                         case 2: {
                             let threshold = 0.5
-                            animations.colorButton.speed *= Math.pow(0.99, dt*2)
+                            animations.colorButton.speed *= Math.pow(0.98, dt)
                             animations.colorButton.angle += animations.colorButton.speed*dt
                             if (animations.colorButton.speed < threshold) {
                                 animations.colorButton.type = 0
@@ -1063,6 +1076,9 @@
                 setStoredKey('flingy_v2_unlockedColors', JSON.stringify(unlockedColors))
             }, 3000)
         }
+
+        menuBgImg = new Image()
+        menuBgImg.src = 'images/menubackground.png'
 
         async function loadSounds() {
             for (let name of soundNames) {
