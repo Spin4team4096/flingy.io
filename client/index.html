@@ -96,12 +96,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: calc(128px*var(--ui));
-            -webkit-text-stroke: calc(12.8px*var(--ui)) var(--red-outline);
-            letter-spacing: calc(4px * var(--ui));
-            font-weight: bold;
             color: var(--red);
-            user-select: none;
+            -webkit-text-stroke: calc(12.8px*var(--ui)) var(--red-outline);
             paint-order: stroke fill;
+            letter-spacing: calc(4px*var(--ui));
+            font-weight: bold;
+            user-select: none;
         }
 
         button {
@@ -242,7 +242,6 @@
             color: black;
             font-size: calc(30px*var(--ui));
             white-space: pre-wrap;
-            user-select: none;
         }
 
         #server-list {
@@ -399,6 +398,7 @@
                 -webkit-text-stroke: calc(4px*var(--ui)) #000000;
                 paint-order: stroke fill;
                 text-align: center;
+                cursor: pointer;
             }
             .section summary {
                 display: flex;
@@ -501,7 +501,24 @@
                     margin-left: auto;
                 }
             }
-
+            .subtitle {
+                font-size: calc(25px*var(--ui));
+                font-weight: bold;
+            }
+            .text {
+                font-size: calc(20px*var(--ui));
+                font-weight: normal;
+            }
+            .point::before {
+                content: "- ";
+            }
+            .point {
+                font-size: calc(20px*var(--ui));
+                font-weight: normal;
+                .point {
+                    margin-left: calc(12px*var(--ui));
+                }
+            }
         }
     </style>
 </head>
@@ -708,7 +725,7 @@
             if (settingsPage != 0 && !ui.settings.contains(e.target) && !ui.menu.bottomRow.settingsButton.contains(e.target)) {
                 toggleSettings()
             }
-            if (changelogOepn && !ui.changelog.contains(e.target) && !ui.menu.bottomRow.changelogButton.contains(e.target)) {
+            if (changelogOpen && !ui.changelog.contains(e.target) && !ui.menu.bottomRow.changelogButton.contains(e.target)) {
                 toggleChangelog()
             }
         })
@@ -829,7 +846,7 @@
             animations.changelogButton.angle = 0
             animations.changelogButton.progress = 0
             clearTimeout(changelogClearTimeout)
-            if (settingsPage != 0) {
+            if (changelogOpen) {
                 renderPanel(ui.changelog, changelogData)
             } else {
                 changelogClearTimeout = setTimeout(() => {
@@ -980,11 +997,44 @@
         }
 
         function renderPanel(panel, data) {
-            console.log(`rendering panel`)
             panel.replaceChildren()
             e = document.createElement(`div`)
             e.className = 'title'
             e.textContent = data['title']
+            e.onclick = () => {
+                switch (settingsPage) {
+                    case 0: {
+                        switch (changelogOpen) {
+                            case true: {
+                                toggleChangelog()
+                            } break
+                        }
+                    } break
+                    case 1: {
+                        toggleSettings()
+                    } break
+                    case 2: {
+                        settingsPage = 1
+                        renderPanel(ui.settings, settingsData[settingsPage])
+                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                    } break
+                    case 3: {
+                        settingsPage = 1
+                        renderPanel(ui.settings, settingsData[settingsPage])
+                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                    } break
+                    case 4: {
+                        settingsPage = 1
+                        renderPanel(ui.settings, settingsData[settingsPage])
+                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                    } break
+                    default: {
+                        settingsPage = 1
+                        renderPanel(ui.settings, settingsData[settingsPage])
+                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                    } break
+                }
+            }
             panel.append(e)
 
             renderNodes(panel, data['children'])
@@ -992,7 +1042,6 @@
 
         function renderNodes(parent, nodes) {
             for (let node of nodes) {
-                console.log(node)
                 switch (node.type) {
                     case 'section': {
                         let details = document.createElement(`details`)
@@ -1006,6 +1055,9 @@
                         summary.insertAdjacentHTML('beforeend', `<svg class="section-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>`)
                         details.open = node.open == true
                         details.append(summary)
+                        summary.onclick = () => {
+                            playSound('bwooop', 1, randomFloat(0.9,1.1))
+                        }
 
                         parent.append(details)
                         renderNodes(details, node.children)
@@ -1022,6 +1074,7 @@
                             e.onclick = () => {
                                 settingsPage = node.page
                                 renderPanel(ui.settings, settingsData[settingsPage])
+                                playSound('bwooop', 1, randomFloat(0.9,1.1))
                             }
                         }
                         parent.append(e)
@@ -1072,14 +1125,41 @@
                     } break
 
                     // changelog stuff
+                    case 'text': {
+                        let text = document.createElement('div')
+                        text.className = 'text'
+                        text.textContent = node.label
+                        text.style.opacity = node.opacity || 1
+                        if (node.size != null) {
+                            text.style.fontSize = `calc(${node.size}px*var(--ui))`
+                        }
+
+                        parent.append(text)
+                    } break
                     case 'server': {
-                        
+                        let subtitle = document.createElement('div')
+                        subtitle.className = 'subtitle'
+                        subtitle.textContent = 'Server:'
+
+                        parent.append(subtitle)
+                        renderNodes(subtitle, node.children)
+
                     } break
                     case 'client': {
-                        
+                        let subtitle = document.createElement('div')
+                        subtitle.className = 'subtitle'
+                        subtitle.textContent = 'Client:'
+
+                        parent.append(subtitle)
+                        renderNodes(subtitle, node.children)
                     } break
-                    case 'point': { // we need a way to do subpoints actually, idk how
-                        
+                    case 'point': {
+                        let text = document.createElement('div')
+                        text.className = 'point'
+                        text.textContent = node.label
+
+                        parent.append(text)
+                        if (node.children) {renderNodes(text, node.children)}
                     } break
                 }
             }

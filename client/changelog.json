@@ -1,17 +1,18 @@
 {
-    "title": "CHANGELOG", 
-    "children": [
+    "title": "CHANGELOG", "children": [
         {"type": "section", "label": "v2.0.0", "open": true, "color": "coral", "children": [
+            {"type": "text", "label": "(2026.11.07 at 19:13 GMT)", "opacity": 0.5, "size": 15},
             {"type": "server", "children": [
                 {"type": "point", "label": "Literally rewrote it in Go.", "children": [
                     {"type": "point", "label": "It took sooo long"}
                 ]}
             ]},
             {"type": "client", "children": [
-                {"type": "point", "label": "I rewrote the entire game from scratch", "children": [
+                {"type": "point", "label": "I rewrote the entire game from scratch!", "children": [
                     {"type": "point", "label": "I am super proud of the UI :D"}
                 ]}
             ]}
-        ]}
+        ]},
+        {"type": "text", "label": "The below changelogs are from the old v1 version, taken from the discord:", "size": 20}
     ]
 }

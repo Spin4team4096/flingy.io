@@ -18,6 +18,10 @@
             {"type": "slider", "label": "Volume", "setting": "volume", "min": 0, "max": 1, "step": 0.05}
         ]}
     ]},
-    "3": {"title": "THEME SETTINGS", "children": []},
-    "4": {"title": "KEYBIND SETTINGS", "children": []}
+    "3": {"title": "THEME SETTINGS", "children": [
+        {"type": "text", "label": "COMING SOON (eventually)", "size": 32}
+    ]},
+    "4": {"title": "KEYBIND SETTINGS", "children": [
+        {"type": "text", "label": "COMING SOON (eventually)", "size": 32}
+    ]}
 }
