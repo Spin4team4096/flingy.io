@@ -133,7 +133,15 @@
             background: var(--c);
             border: calc(6px*var(--ui)) solid var(--c-outline);
             border-radius: calc(8px*var(--ui));
-            padding: calc(12px*var(--ui));
+            &[open] {
+                padding: 0 calc(12px*var(--ui)) calc(12px*var(--ui));
+            }
+        }
+
+        .panel .section[open] > summary {
+            width: auto;
+            margin-left: calc(-12px*var(--ui));
+            margin-right: calc(-12px*var(--ui));
         }
 
         .section summary {
@@ -374,6 +382,10 @@
             background: var(--orange);
             border: calc(6px*var(--ui)) solid var(--orange-outline);
             outline: var(--orange-outline);
+            scrollbar-width: none;
+        }
+        #changelog-panel::-webkit-scrollbar {
+            display: none;
         }
         .panel {
             position: fixed;
@@ -409,7 +421,7 @@
                 --c-outline: var(--red-outline);
                 color: var(--c-outline);
                 box-sizing: border-box;
-                padding: 0;
+                padding: calc(12px*var(--ui));
                 cursor: pointer;
                 font-size: calc(30px*var(--ui));
                 font-weight: bold;
@@ -920,6 +932,10 @@
             source.playbackRate.value = pitch
             source.connect(gain).connect(masterGain)
             source.start()
+        }
+
+        function parseMarkdown(text) {
+
         }
 
         // Drawing Functions

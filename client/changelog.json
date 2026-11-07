@@ -1,18 +1,340 @@
 {
-    "title": "CHANGELOG", "children": [
-        {"type": "section", "label": "v2.0.0", "open": true, "color": "coral", "children": [
-            {"type": "text", "label": "(2026.11.07 at 20:13 GMT) <-- will change cuz im coding", "opacity": 0.5, "size": 15},
-            {"type": "server", "children": [
-                {"type": "point", "label": "Literally rewrote it in Go.", "children": [
-                    {"type": "point", "label": "It took sooo long"}
-                ]}
-            ]},
-            {"type": "client", "children": [
-                {"type": "point", "label": "I rewrote the entire game from scratch!", "children": [
-                    {"type": "point", "label": "I am super proud of the UI :D"}
-                ]}
-            ]}
-        ]},
-        {"type": "text", "label": "The below changelogs are from the old v1 version, taken from the discord:", "size": 20}
+    "title": "CHANGELOG",
+    "children": [
+        {
+            "type": "section",
+            "label": "v2.0.0",
+            "open": true,
+            "color": "red",
+            "children": [
+                {
+                    "type": "text",
+                    "label": "(2026.11.07 at 20:13 GMT) <-- will change cuz im coding",
+                    "opacity": 0.5,
+                    "size": 15
+                },
+                {
+                    "type": "text",
+                    "label": "I basically rewrote the entire game from scratch (not vibe-coded)"
+                },
+                {
+                    "type": "server",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "Literally rewrote it in Go.",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "It took sooo long"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "client",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "I rewrote the entire game from scratch!",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "I am super proud of the UI :D"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "label": "The below changelogs are from the old v1 version, taken from the discord:",
+            "size": 20
+        },
+        {
+            "type": "section",
+            "label": "v1.1.3",
+            "open": false,
+            "color": "coral",
+            "children": [
+                {
+                    "type": "text",
+                    "label": "(2026.07.28 at 23:35 GMT)",
+                    "opacity": 0.5,
+                    "size": 15
+                },
+                {
+                    "type": "server",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "bots no longer faceplant into walls or corners, and they don't flee too far.",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "bot accuracy nerfed 150 --> 250, but also slightly buffed by changing the calculation for innacuracy to make it better"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "client",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "added mobile controls yeay!"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "section",
+            "label": "v1.1.2",
+            "open": false,
+            "color": "coral",
+            "children": [
+                {
+                    "type": "text",
+                    "label": "(2026.07.24 at 17:10 GMT)",
+                    "opacity": 0.5,
+                    "size": 15
+                },
+                {
+                    "type": "text",
+                    "label": "it's a big one"
+                },
+                {
+                    "type": "server",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "Bots are smarter now:",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "Much less likely to release small flails"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "`Move` phase - Only chases if its flail is bigger than the enemy, otherwise just goes straight to spinning"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "Dodging is now added to `move` phase (previously only in `spin` phase)"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "point",
+                            "label": "Added more server settings:",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "`matchTime` controls how long until the border shrinks to deathmatch size"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "`botPercentage` replaced the old `spawnBots` setting, so I can spawn 0% bots, 50%, 69%, 100% etc"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "point",
+                            "label": "Other minor tweaks/fixes"
+                        }
+                    ]
+                },
+                {
+                    "type": "client",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "Added a gamemode selector! It's similar to cobbled.io; the main difference is that it selects gamemodes but not a specific lobby"
+                        },
+                        {
+                            "type": "point",
+                            "label": "If you can't connect to a server, it marks it as dead and picks a different server next try (so if one server crashes, you can still access the others)"
+                        },
+                        {
+                            "type": "point",
+                            "label": "Bug Fixes:",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "Minimap no longer shows your dot if you're dead"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "Sound volume now uses distance from camera position instead of player position"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "`Time Alive` stat now shows the total time alive from all 3 runs, not just time since last death. (It's also lag resistant now)"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "section",
+            "label": "v1.1.1",
+            "open": false,
+            "color": "coral",
+            "children": [
+                {
+                    "type": "text",
+                    "label": "(2026.07.21 at 23:05 GMT)",
+                    "opacity": 0.5,
+                    "size": 15
+                },
+                {
+                    "type": "text",
+                    "label": "losta optimisation:"
+                },
+                {
+                    "type": "server",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "Network packets are significantly smaller now:",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "Dead players are excluded from entity data entirely"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "The remaining data is encoded into binary (just like cobbled.io):",
+                                    "children": [
+                                        {
+                                            "type": "point",
+                                            "label": "1846 --> 321 bytes for 4 alive players (82.6% smaller wowie)"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "point",
+                            "label": "Bug Fix: Player count no longer includes bots lol"
+                        }
+                    ]
+                },
+                {
+                    "type": "client",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "Only renders up to 256 players on the minimap, after which it shows a brown underlay"
+                        },
+                        {
+                            "type": "point",
+                            "label": "Client now appends `[BOT] ` to names instead of the server"
+                        },
+                        {
+                            "type": "point",
+                            "label": "No longer does movement prediction for players outside of view"
+                        },
+                        {
+                            "type": "point",
+                            "label": "Entity view-culling now takes usernames and other text into consideration when calculating the bounding box"
+                        },
+                        {
+                            "type": "point",
+                            "label": "Only the newest 8 notifications can render at once."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "section",
+            "label": "v1.1.0",
+            "open": false,
+            "color": "coral",
+            "children": [
+                {
+                    "type": "text",
+                    "label": "(2026.07.08 at 23:55 GMT)",
+                    "opacity": 0.5,
+                    "size": 15
+                },
+                {
+                    "type": "text",
+                    "label": "big update yeee! :D"
+                },
+                {
+                    "type": "server",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "Added bots! That way each match always has at least 4 \"players\" (aka half-full server) so you can play even if no one else is online ;)",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "Bots have `spin` and `move` phases:",
+                                    "children": [
+                                        {
+                                            "type": "point",
+                                            "label": "`Spin` Phase: They are slightly inaccurate, just like humans, and can also dodge! ~~(sometimes)~~"
+                                        },
+                                        {
+                                            "type": "point",
+                                            "label": "`Move` Phase: If they have their flail, they (blindly) chase, otherwise they run and sorta avoid flails."
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "point",
+                            "label": "Server now allows new players to join a match in progress if nobody has taken damage yet"
+                        }
+                    ]
+                },
+                {
+                    "type": "client",
+                    "children": [
+                        {
+                            "type": "point",
+                            "label": "The death screen now fades away when spectating (when you press WASD or P)"
+                        },
+                        {
+                            "type": "point",
+                            "label": "Added culling (performance boost)"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "section",
+            "label": "v1.0.0",
+            "open": false,
+            "color": "coral",
+            "children": [
+                {
+                    "type": "text",
+                    "label": "(2026.06.21 at 17:29 GMT)",
+                    "opacity": 0.5,
+                    "size": 15
+                },
+                {
+                    "type": "text",
+                    "label": "the initial release. the core game with no custom colors yet."
+                },
+                {
+                    "type": "text",
+                    "label": "This was a game jam submitted for the [Juniper Dev Game Jam](https://itch.io/jam/theveryseriousjuniperdevgamejam)"
+                }
+            ]
+        }
     ]
 }

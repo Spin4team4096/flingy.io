@@ -9,3 +9,6 @@ dev.sh
 
 # build output
 /flingy
+
+# local dev tools
+/tools
