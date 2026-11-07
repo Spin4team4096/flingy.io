@@ -1,8 +1,8 @@
 {
     "1": {"title": "SETTINGS", "children": [
-        {"type": "button", "label": "General Settings", "page": 2, "color": "red", "height": "15%"},
-        {"type": "button", "label": "Theme Settings", "page": 3, "color": "coral", "height": "15%"},
-        {"type": "button", "label": "Keybind Settings", "page": 4, "color": "orange", "height": "15%"}
+        {"type": "button", "label": "General Settings", "page": 2, "color": "red", "height": "18%"},
+        {"type": "button", "label": "Theme Settings", "page": 3, "color": "coral", "height": "18%"},
+        {"type": "button", "label": "Keybind Settings", "page": 4, "color": "orange", "height": "18%"}
     ]},
     "2": {"title": "GENERAL SETTINGS", "children": [
         {"type": "section", "label": "Interface", "open": true, "color": "red", "children": [

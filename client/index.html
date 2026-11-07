@@ -64,12 +64,19 @@
             font-style: italic;
             font-display: swap;
         }
+
         * {
             box-sizing: border-box;
             border-radius: calc(8px*var(--ui));
             font-family: "Ubuntu", helvetica, arial, sans-serif;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
+
+        code {
+            font-family: monospace;
+        }
+        
         #game {
             position: fixed;
             inset: 0;
@@ -377,6 +384,10 @@
             background: var(--gray);
             border: calc(6px*var(--ui)) solid var(--gray-outline);
             outline: var(--gray-outline);
+            scrollbar-width: none;
+        }
+        #settings-panel::-webkit-scrollbar {
+            display: none;
         }
         #changelog-panel {
             background: var(--orange);
@@ -470,13 +481,13 @@
                     appearance: none;
                     width: calc(28px*var(--ui));
                     height: calc(28px*var(--ui));
-                    background: var(--c);
+                    background: var(--white);
                     border: calc(6px*var(--ui)) solid var(--c-outline);
                     margin: 0;
                     cursor: pointer;
                 }
                 input[type="checkbox"]:checked {
-                    background: var(--white);
+                    background: var(--c);
                     /*
                     background-image:
                         linear-gradient(45deg,
@@ -490,13 +501,13 @@
                             var(--white-outline) calc(50% + 3px*var(--ui)),
                             transparent calc(50% + 3px*var(--ui)));
                     */
-                    border: calc(6px*var(--ui)) solid var(--white-outline);
+                    border: calc(6px*var(--ui)) solid var(--c-outline);
                     cursor: pointer;
                 }
                 input[type="range"] {
                     appearance: none;
-                    background: var(--c);
-                    box-shadow: inset 0 0 0 calc(6px*var(--ui)) var(--c-outline);
+                    background: var(--white);
+                    box-shadow: inset 0 0 0 calc(6px*var(--ui)) var(--white-outline);
                     width: calc(128px*var(--ui));
                     height: calc(20px*var(--ui));
                 }
@@ -504,8 +515,8 @@
                     -webkit-appearance: none;
                     width: calc(28px*var(--ui));
                     height: calc(28px*var(--ui));
-                    background: var(--white);
-                    border: calc(6px*var(--ui)) solid var(--white-outline);
+                    background: var(--c);
+                    border: calc(6px*var(--ui)) solid var(--c-outline);
                     border-radius: calc(8px*var(--ui));
                     cursor: pointer;
                 }
@@ -935,7 +946,16 @@
         }
 
         function parseMarkdown(text) {
+            let output = ''
+            let texts = text.split(" \n ")
+            for (let i = 0; i < texts.length; i++) {
+                output += `${parseRange(texts[i], 0, texts[i].length)}${i < texts.length-1 ? '<br>' : ''}`
+            }
+            return output
+        }
 
+        function parseRange(text, start, end) {
+            return text
         }
 
         // Drawing Functions
@@ -1385,7 +1405,11 @@
                 let ratio = menuBgImg.width/menuBgImg.height
                 let dw = Math.max(canvas.width, canvas.height*ratio)*1.1
                 let dh = dw/ratio
+                ctx.save()
+                ctx.translate(canvas.width, canvas.height)
+                ctx.scale(-1, -1)
                 ctx.drawImage(menuBgImg, canvas.width/2-dw/2+menuBgX, canvas.height/2-dh/2+menuBgY, dw, dh)
+                ctx.restore()
             }
 
             // html ui
