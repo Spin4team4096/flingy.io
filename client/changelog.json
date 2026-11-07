@@ -1,17 +1,17 @@
-[
-    {
-        "label": "Go Rewrite",
-        "version": "v2.0.0", 
-        "time": 1793841840329, 
-        "server": [
-            "literally rewrote it in Go."
-        ],
-        "client": [
-            "I just rewrote it entirely.",
-            ["and now i'm gonna show off:", [
-                "oo look at mee, i'm a subpoint!",
-                "me too"
-            ]]
-        ]
-    }
-]
+{
+    "title": "CHANGELOG", 
+    "children": [
+        {"type": "section", "label": "v2.0.0", "open": true, "color": "coral", "children": [
+            {"type": "server", "children": [
+                {"type": "point", "label": "Literally rewrote it in Go.", "children": [
+                    {"type": "point", "label": "It took sooo long"}
+                ]}
+            ]},
+            {"type": "client", "children": [
+                {"type": "point", "label": "I rewrote the entire game from scratch", "children": [
+                    {"type": "point", "label": "I am super proud of the UI :D"}
+                ]}
+            ]}
+        ]}
+    ]
+}

@@ -2,6 +2,10 @@
 serviceAccountKey.json
 firebase-keys.json
 .env
+dev.env
+
+# machine-specific
+dev.sh
 
 # build output
 /flingy

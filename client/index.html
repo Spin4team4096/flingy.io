@@ -8,13 +8,66 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root {
-            /*--ui: 1;*/
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-light.woff2") format("woff2");
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-lightitalic.woff2") format("woff2");
+            font-weight: 300;
+            font-style: italic;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-regular.woff2") format("woff2");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-italic.woff2") format("woff2");
+            font-weight: 400;
+            font-style: italic;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-medium.woff2") format("woff2");
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-mediumitalic.woff2") format("woff2");
+            font-weight: 500;
+            font-style: italic;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-bold.woff2") format("woff2");
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("fonts/ubuntu-bolditalic.woff2") format("woff2");
+            font-weight: 700;
+            font-style: italic;
+            font-display: swap;
         }
         * {
             box-sizing: border-box;
             border-radius: calc(8px*var(--ui));
-            font-family: helvetica, arial, sans-serif;
+            font-family: "Ubuntu", helvetica, arial, sans-serif;
             user-select: none;
         }
         #game {
@@ -43,7 +96,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: calc(128px*var(--ui));
-            -webkit-text-stroke: calc(12px*var(--ui)) var(--red-outline);
+            -webkit-text-stroke: calc(12.8px*var(--ui)) var(--red-outline);
             letter-spacing: calc(4px * var(--ui));
             font-weight: bold;
             color: var(--red);
@@ -72,6 +125,34 @@
             transform: rotate(var(--angle, 0deg));
             z-index: -1;
             pointer-events: none;
+        }
+
+        .section {
+            --c: var(--red);
+            --c-outline: var(--red-outline);
+            background: var(--c);
+            border: calc(6px*var(--ui)) solid var(--c-outline);
+            border-radius: calc(8px*var(--ui));
+            padding: calc(12px*var(--ui));
+        }
+
+        .section summary {
+            cursor: pointer;
+            font-size: calc(30px*var(--ui));
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .section-arrow {
+            width: calc(24px*var(--ui));
+            height: calc(24px*var(--ui));
+            margin-left: auto;
+            transition: transform calc(0.25s*var(--transition, 1));
+            stroke: var(--c-outline);
+        }
+
+        .section[open] .section-arrow {
+            transform: rotate(90deg);
         }
 
         #menu-controls {
@@ -165,7 +246,7 @@
         }
 
         #server-list {
-
+            /* ARE YOU EVER CODE ME IN!? */
         }
 
         #shop {
@@ -285,19 +366,6 @@
             stroke-width: 3;
         }
 
-        #settings-panel, #changelog-panel {
-            position: fixed;
-            top: calc(12px*var(--ui));
-            left: calc(-450px*var(--ui));
-            bottom: calc(88px*var(--ui));
-            width: calc(450px*var(--ui));
-            transition: left calc(0.25s*var(--transition, 1));
-            padding: calc(12px*var(--ui));
-            overflow-y: auto;
-            z-index: 20;
-            &.open {left: calc(12px*var(--ui));}
-        }
-
         #settings-panel {
             background: var(--gray);
             border: calc(6px*var(--ui)) solid var(--gray-outline);
@@ -307,6 +375,133 @@
             background: var(--orange);
             border: calc(6px*var(--ui)) solid var(--orange-outline);
             outline: var(--orange-outline);
+        }
+        .panel {
+            position: fixed;
+            top: calc(12px*var(--ui));
+            left: calc(-450px*var(--ui));
+            bottom: calc(88px*var(--ui));
+            width: calc(450px*var(--ui));
+            transition: left calc(0.25s*var(--transition, 1));
+            padding: calc(12px*var(--ui));
+            overflow-y: auto;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: calc(12px*var(--ui));
+            &.open {left: calc(12px*var(--ui));}
+
+            .title {
+                font-size: calc(40px*var(--ui));
+                font-weight: bold;
+                margin: 0 auto;
+                color: #ffffff;
+                -webkit-text-stroke: calc(4px*var(--ui)) #000000;
+                paint-order: stroke fill;
+                text-align: center;
+            }
+            .section summary {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                width: 100%;
+                --c: var(--red);
+                --c-outline: var(--red-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+                font-size: calc(30px*var(--ui));
+                font-weight: bold;
+                margin: 0 auto;
+                color: #ffffff;
+                -webkit-text-stroke: calc(3px*var(--ui)) #000000;
+                paint-order: stroke fill;
+                text-align: center;
+            }
+            .button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 15%;
+                --c: var(--red);
+                --c-outline: var(--red-outline);
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                cursor: pointer;
+                font-size: calc(30px*var(--ui));
+                font-weight: bold;
+                margin: 0 auto;
+                color: #ffffff;
+                -webkit-text-stroke: calc(3px*var(--ui)) #000000;
+                paint-order: stroke fill;
+                text-align: center;
+            }
+            .label {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                color: var(--c-outline);
+                box-sizing: border-box;
+                padding: 0;
+                font-size: calc(20px*var(--ui));
+                font-weight: bold;
+                margin: 0 auto;
+                color: #ffffff;
+                -webkit-text-stroke: calc(2px*var(--ui)) #000000;
+                paint-order: stroke fill;
+                text-align: center;
+                input[type="checkbox"] {
+                    appearance: none;
+                    width: calc(28px*var(--ui));
+                    height: calc(28px*var(--ui));
+                    background: var(--c);
+                    border: calc(6px*var(--ui)) solid var(--c-outline);
+                    margin: 0;
+                    cursor: pointer;
+                }
+                input[type="checkbox"]:checked {
+                    background: var(--white);
+                    /*
+                    background-image:
+                        linear-gradient(45deg,
+                            transparent calc(50% - 3px*var(--ui)),
+                            var(--white-outline) calc(50% - 3px*var(--ui)),
+                            var(--white-outline) calc(50% + 3px*var(--ui)),
+                            transparent calc(50% + 3px*var(--ui))),
+                        linear-gradient(-45deg,
+                            transparent calc(50% - 3px*var(--ui)),
+                            var(--white-outline) calc(50% - 3px*var(--ui)),
+                            var(--white-outline) calc(50% + 3px*var(--ui)),
+                            transparent calc(50% + 3px*var(--ui)));
+                    */
+                    border: calc(6px*var(--ui)) solid var(--white-outline);
+                    cursor: pointer;
+                }
+                input[type="range"] {
+                    appearance: none;
+                    background: var(--c);
+                    box-shadow: inset 0 0 0 calc(6px*var(--ui)) var(--c-outline);
+                    width: calc(128px*var(--ui));
+                    height: calc(20px*var(--ui));
+                }
+                input[type="range"]::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    width: calc(28px*var(--ui));
+                    height: calc(28px*var(--ui));
+                    background: var(--white);
+                    border: calc(6px*var(--ui)) solid var(--white-outline);
+                    border-radius: calc(8px*var(--ui));
+                    cursor: pointer;
+                }
+                .value {
+                    margin-left: auto;
+                }
+            }
+
         }
     </style>
 </head>
@@ -353,8 +548,8 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-leave"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
         </button>
     </div>
-    <div id="settings-panel"></div>
-    <div id="changelog-panel"></div>
+    <div id="settings-panel" class="panel"></div>
+    <div id="changelog-panel" class="panel"></div>
     <script>
         // TODO:
         // - everything
@@ -508,6 +703,15 @@
             let key = e.key.toLowerCase()
             keys[key] = false
         })
+
+        addEventListener('pointerdown', e => {
+            if (settingsPage != 0 && !ui.settings.contains(e.target) && !ui.menu.bottomRow.settingsButton.contains(e.target)) {
+                toggleSettings()
+            }
+            if (changelogOepn && !ui.changelog.contains(e.target) && !ui.menu.bottomRow.changelogButton.contains(e.target)) {
+                toggleChangelog()
+            }
+        })
         
         function clearInputState() {
             keys = {}
@@ -556,6 +760,7 @@
                 progress: 1,
             },
         }
+
         ui.menu.menuControls.colorButton.addEventListener('pointerdown', () => {
             if (animations.colorButton.type == 1) return
             playSound('bwooop', 1, randomFloat(0.9,1.1))
@@ -568,6 +773,7 @@
             ui.menu.menuControls.colorButton.style.setProperty('--c', `var(--${playerColor})`)
             ui.menu.menuControls.colorButton.style.setProperty('--c-outline', `var(--${playerColor}-outline)`)
         })
+
         ui.menu.menuControls.playButton.addEventListener('pointerdown', () => {
             if (animations.playButton.state != 0 && animations.playButton.result < 2) return
             playSound('bwooop', 1, randomFloat(0.9,1.1))
@@ -580,7 +786,9 @@
             playerSlot = undefined
             pickServer()
         })
-        ui.menu.bottomRow.settingsButton.addEventListener('pointerdown', () => {
+
+        settingsClearTimeout = null
+        function toggleSettings() {
             settingsPage = settingsPage != 0 ? 0 : 1
             ui.settings.classList.toggle('open', settingsPage != 0)
             if (changelogOpen) {
@@ -594,8 +802,19 @@
             animations.settingsButton.type = settingsPage != 0 ? 1 : 2
             animations.settingsButton.angle = 0
             animations.settingsButton.progress = 0
-        })
-        ui.menu.bottomRow.changelogButton.addEventListener('pointerdown', () => {
+            clearTimeout(settingsClearTimeout)
+            if (settingsPage != 0) {
+                renderPanel(ui.settings, settingsData[settingsPage])
+            } else {
+                settingsClearTimeout = setTimeout(() => {
+                    ui.settings.replaceChildren()
+                }, 250*settings.transitionSpeed)
+            }
+        }
+        ui.menu.bottomRow.settingsButton.addEventListener('pointerdown', () => {toggleSettings()})
+
+        changelogClearTimeout = null
+        function toggleChangelog() {
             changelogOpen = !changelogOpen
             ui.changelog.classList.toggle('open', changelogOpen)
             if (settingsPage != 0) {
@@ -609,7 +828,17 @@
             animations.changelogButton.type = changelogOpen == true ? 1 : 2
             animations.changelogButton.angle = 0
             animations.changelogButton.progress = 0
-        })
+            clearTimeout(changelogClearTimeout)
+            if (settingsPage != 0) {
+                renderPanel(ui.changelog, changelogData)
+            } else {
+                changelogClearTimeout = setTimeout(() => {
+                    ui.changelog.replaceChildren()
+                }, 250*settings.transitionSpeed)
+            }
+        }
+        ui.menu.bottomRow.changelogButton.addEventListener('pointerdown', () => {toggleChangelog()})
+
         ui.menu.bottomRow.discordButton.addEventListener('click', () => {
             if (animations.discordButton.progress < 1) return
             playSound('bwooop', 1, randomFloat(0.9,1.1))
@@ -620,6 +849,7 @@
                 window.open('https://discord.gg/z2uZvEXfPx', '_blank')
             }, 300*settings.transitionSpeed)
         })
+
         ui.menu.shop.buyColor.addEventListener('click', () => {
             if (animations.colorButton.type != 0) return
             if (coins < colorPrice || remainingColors.length == 0) {
@@ -703,10 +933,10 @@
                     t = Date.now()/640
                     start = [255,102,102]
                     end = [255,128,166]
-                    factor = 0.5 + 0.5 * Math.sin(t)
-                    r = Math.round(start[0] + (end[0]-start[0])*factor)
-                    g = Math.round(start[1] + (end[1]-start[1])*factor)
-                    b = Math.round(start[2] + (end[2]-start[2])*factor)
+                    factor = 0.5+0.5*Math.sin(t)
+                    r = Math.round(start[0]+(end[0]-start[0])*factor)
+                    g = Math.round(start[1]+(end[1]-start[1])*factor)
+                    b = Math.round(start[2]+(end[2]-start[2])*factor)
                     return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
                 }
                 default: return '#ff00ff'
@@ -739,13 +969,119 @@
                     t = Date.now()/640
                     start = [191,77,77]
                     end = [191,96,124]
-                    factor = 0.5 + 0.5 * Math.sin(t)
-                    r = Math.round(start[0] + (end[0]-start[0])*factor)
-                    g = Math.round(start[1] + (end[1]-start[1])*factor)
-                    b = Math.round(start[2] + (end[2]-start[2])*factor)
+                    factor = 0.5+0.5*Math.sin(t)
+                    r = Math.round(start[0]+(end[0]-start[0])*factor)
+                    g = Math.round(start[1]+(end[1]-start[1])*factor)
+                    b = Math.round(start[2]+(end[2]-start[2])*factor)
                     return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
                 }
                 default: return '#ff0000'
+            }
+        }
+
+        function renderPanel(panel, data) {
+            console.log(`rendering panel`)
+            panel.replaceChildren()
+            e = document.createElement(`div`)
+            e.className = 'title'
+            e.textContent = data['title']
+            panel.append(e)
+
+            renderNodes(panel, data['children'])
+        }
+
+        function renderNodes(parent, nodes) {
+            for (let node of nodes) {
+                console.log(node)
+                switch (node.type) {
+                    case 'section': {
+                        let details = document.createElement(`details`)
+                        let summary = document.createElement(`summary`)
+                        details.className = 'section'
+                        summary.textContent = node.label
+                        summary.style.setProperty('--c', `var(--${node.color})`)
+                        summary.style.setProperty('--c-outline', `var(--${node.color}-outline)`)
+                        details.style.setProperty('--c', `var(--${node.color})`)
+                        details.style.setProperty('--c-outline', `var(--${node.color}-outline)`)
+                        summary.insertAdjacentHTML('beforeend', `<svg class="section-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>`)
+                        details.open = node.open == true
+                        details.append(summary)
+
+                        parent.append(details)
+                        renderNodes(details, node.children)
+                        
+                    } break
+                    case 'button': {
+                        let e = document.createElement(`button`)
+                        e.className = 'button'
+                        e.textContent = node.label
+                        e.style.setProperty('--c', `var(--${node.color})`)
+                        e.style.setProperty('--c-outline', `var(--${node.color}-outline)`)
+                        e.style.height = node.height || '15%'
+                        if (node.page) {
+                            e.onclick = () => {
+                                settingsPage = node.page
+                                renderPanel(ui.settings, settingsData[settingsPage])
+                            }
+                        }
+                        parent.append(e)
+                    } break
+                    case 'toggle': {
+                        let e = document.createElement(`div`)
+                        e.className = 'label'
+                        e.textContent = node.label
+
+                        let input = document.createElement('input')
+                        input.type = 'checkbox'
+                        input.checked = !!settings[node.setting]
+                        input.addEventListener('change', () => {
+                            settings[node.setting] = input.checked
+                            loadSettings()
+                        })
+
+                        e.append(input)
+                        parent.append(e)
+                    } break
+                    case 'slider': {
+                        let label = document.createElement(`div`)
+                        label.className = 'label'
+                        label.textContent = node.label
+
+                        let value = document.createElement(`div`)
+                        value.className = 'value'
+                        value.textContent = settings[node.setting].toFixed(2)
+
+                        let input = document.createElement('input')
+                        input.type = 'range'
+                        input.min = node.min
+                        input.max = node.max
+                        input.step = node.step
+                        input.value = settings[node.setting]
+                        input.addEventListener('input', () => {
+                            value.textContent = Number(input.value).toFixed(2)
+                        })
+                        input.addEventListener('change', () => {
+                            settings[node.setting] = Number(input.value)
+                            value.textContent = Number(input.value).toFixed(2)
+                            loadSettings()
+                        })
+
+                        label.append(value)
+                        label.append(input)
+                        parent.append(label)
+                    } break
+
+                    // changelog stuff
+                    case 'server': {
+                        
+                    } break
+                    case 'client': {
+                        
+                    } break
+                    case 'point': { // we need a way to do subpoints actually, idk how
+                        
+                    } break
+                }
             }
         }
 
@@ -1153,6 +1489,11 @@
 
         changelogData = []
         fetch('changelog.json').then(r => r.json()).then(d => changelogData = d)
+        if (changelogData) {console.log(`loaded changelog data`)} else {console.log(`couldn't load changelog data`)}
+
+        settingsData = []
+        fetch('settings.json').then(r => r.json()).then(d => settingsData = d)
+        if (settingsData) {console.log(`loaded settings data`)} else {console.log(`couldn't load settings data`)}
 
         async function loadSounds() {
             for (let name of soundNames) {

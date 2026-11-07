@@ -1,23 +1,23 @@
 {
-    "1": {"title": "Settings", "children": [
-        {"type": "button", "label": "General Settings", "page": 2, "heightPercent": 20},
-        {"type": "button", "label": "Theme Settings", "page": 3, "heightPercent": 20},
-        {"type": "button", "label": "Keybind Settings", "page": 4, "heightPercent": 20}
+    "1": {"title": "SETTINGS", "children": [
+        {"type": "button", "label": "General Settings", "page": 2, "color": "red", "height": "15%"},
+        {"type": "button", "label": "Theme Settings", "page": 3, "color": "coral", "height": "15%"},
+        {"type": "button", "label": "Keybind Settings", "page": 4, "color": "orange", "height": "15%"}
     ]},
-    "2": {"title": "General Settings", "children": [
-        {"type": "section", "label": "Interface", "children": [
-            {"type": "slider", "label": "UI Scale", "setting": "uiScale", "min": 0.25, "max": 2, "step": 0.05},
+    "2": {"title": "GENERAL SETTINGS", "children": [
+        {"type": "section", "label": "Interface", "open": true, "color": "red", "children": [
+            {"type": "slider", "label": "UI Scale", "setting": "uiScale", "min": 0.5, "max": 2, "step": 0.05},
             {"type": "slider", "label": "Transition Time", "setting": "transitionSpeed", "min": 0, "max": 2, "step": 0.05},
             {"type": "slider", "label": "Spin Time", "setting": "spinSpeed", "min": 0.25, "max": 2, "step": 0.05}
         ]},
-        {"type": "section", "label": "HUD", "children": [
+        {"type": "section", "label": "HUD", "open": true, "color": "coral", "children": [
             {"type": "toggle", "label": "Show Leaderboard", "setting": "showLeaderboard"},
             {"type": "toggle", "label": "Show Minimap", "setting": "showMinimap"}
         ]},
-        {"type": "section", "label": "Sounds", "children": [
+        {"type": "section", "label": "Sounds", "open": true, "color": "orange", "children": [
             {"type": "slider", "label": "Volume", "setting": "volume", "min": 0, "max": 1, "step": 0.05}
         ]}
     ]},
-    "3": {"title": "Theme Settings", "children": []},
-    "4": {"title": "Keybind Settings", "children": []}
+    "3": {"title": "THEME SETTINGS", "children": []},
+    "4": {"title": "KEYBIND SETTINGS", "children": []}
 }
