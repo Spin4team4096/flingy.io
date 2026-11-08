@@ -917,7 +917,7 @@
         database.ref("flingy2/status").on("value", (snapshot) => {
             statusMessage = snapshot.val()
             if (statusMessage) {
-                ui.menu.status.textContent = statusMessage.text
+                ui.menu.status.replaceChildren(parseMarkdown(statusMessage.text))
                 ui.menu.status.style.setProperty('--c', `var(--${statusMessage.color})`)
                 ui.menu.status.style.setProperty('--c-outline', `var(--${statusMessage.color}-outline)`)
             }
@@ -946,12 +946,15 @@
         }
 
         function parseMarkdown(text) {
-            let output = ''
-            let texts = text.split(" \n ")
-            for (let i = 0; i < texts.length; i++) {
-                output += `${parseRange(texts[i], 0, texts[i].length)}${i < texts.length-1 ? '<br>' : ''}`
+            let fragment = document.createDocumentFragment()
+            let lines = text.split(" \\n ")
+            for (let i = 0; i < lines.length; i++) {
+                fragment.append(parseRange(lines[i], 0, lines[i].length))
+                if (i < lines.length-1) {
+                    fragment.append(document.createElement('br'))
+                }
             }
-            return output
+            return fragment
         }
 
         function parseRange(text, start, end) {
@@ -1164,7 +1167,7 @@
                     case 'text': {
                         let text = document.createElement('div')
                         text.className = 'text'
-                        text.textContent = node.label
+                        text.replaceChildren(parseMarkdown(node.label))
                         text.style.opacity = node.opacity || 1
                         if (node.size != null) {
                             text.style.fontSize = `calc(${node.size}px*var(--ui))`
@@ -1192,7 +1195,7 @@
                     case 'point': {
                         let text = document.createElement('div')
                         text.className = 'point'
-                        text.textContent = node.label
+                        text.replaceChildren(parseMarkdown(node.label))
 
                         parent.append(text)
                         if (node.children) {renderNodes(text, node.children)}
@@ -1356,7 +1359,7 @@
             player: [],
         }
         tips = [
-            "DRINK WATER",
+            "***DRINK WATER***",
             "Spin to grow your flail!",
             "Flails get harder to turn the heavier they get.",
             "Left click to release your flail!",
@@ -1364,9 +1367,9 @@
             "Don't spin too fast! or you'll wrap back around the other way.",
             "Each kill gives 1 fling. Spend them to unlock colors!",
             "<-- Flex your fling count in the DISCORD!",
-            "SPIN SPIN SPIN SPIN SPIN SPIN SPIN SPIN",
-            "I am super proud of this UI :D",
-            "This game was NOT vibe-coded.",
+            "*SPIN SPIN SPIN SPIN SPIN SPIN SPIN SPIN*",
+            "I am *super* proud of this UI :D",
+            "This game was **NOT** vibe-coded.",
         ]
         settings = {
             uiScale: 1,
@@ -1644,7 +1647,7 @@
             ui.menu.tips.style.opacity = 0
             setTimeout(() => {
                 tipIndex = (tipIndex+1)%tips.length
-                ui.menu.tips.textContent = tips[tipIndex]
+                ui.menu.tips.replaceChildren(parseMarkdown(tips[tipIndex]))
                 ui.menu.tips.style.opacity = 1
             }, 1000*settings.transitionSpeed)
         }, 10000)
