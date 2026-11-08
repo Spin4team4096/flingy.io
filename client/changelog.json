@@ -3,32 +3,32 @@
     "children": [
         {
             "type": "section",
-            "label": "v2.0.0",
+            "label": "pre-v2.0.0 (indev)",
             "open": true,
             "color": "red",
             "children": [
                 {
                     "type": "text",
-                    "label": "(2026.11.07 at 20:13 GMT) <-- will change cuz im coding",
+                    "label": "(2026.11.08 at 05:19 GMT)",
                     "opacity": 0.5,
                     "size": 15
                 },
                 {
                     "type": "text",
-                    "label": "I basically rewrote the entire game from scratch (not vibe-coded)"
+                    "label": "^^^ I am actively working on it, so this changelog will basically be nonexistent until release",
+                    "opacity": 0.5,
+                    "size": 15
+                },
+                {
+                    "type": "text",
+                    "label": "I am basically rewriting the entire game from scratch (not vibe-coded)"
                 },
                 {
                     "type": "server",
                     "children": [
                         {
                             "type": "point",
-                            "label": "Literally rewrote it in Go.",
-                            "children": [
-                                {
-                                    "type": "point",
-                                    "label": "It took sooo long"
-                                }
-                            ]
+                            "label": "Literally rewrote it in Go."
                         }
                     ]
                 },
@@ -42,6 +42,10 @@
                                 {
                                     "type": "point",
                                     "label": "I am super proud of the UI :D"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "Also, it runs at your monitor's refresh rate, so no more 30fps cap. You're welcome, `@quasll` :P"
                                 }
                             ]
                         }

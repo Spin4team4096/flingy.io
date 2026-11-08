@@ -12,7 +12,7 @@
 - `status` that lists the servers AND their status (lagging/joinable/full), or `status <serverID>` for only that server's status
 - `stats` that measures and gives avg tps and mspt etc, and `stats <serverID>` for that
 - give command finish feedback on those currently silent commands, like `unregister all` would log `unregistered 7 lobbies` for example.
-- `list <parameter>`, defaults to assuming `local`, but you can also list `firebase`
+- `list <parameter>`, defaults to assuming `local`, but you can also list everything in `firebase`
 
 ### Random Ideas
 - Have a server health tracking system, like a command `health` and a struct that contains health info;
