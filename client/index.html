@@ -75,6 +75,10 @@
 
         code {
             font-family: monospace;
+            color: #ffffff;
+        }
+        a {
+            color: #ffffff;
         }
         
         #game {
@@ -949,7 +953,7 @@
             let fragment = document.createDocumentFragment()
             let lines = text.split(" \\n ")
             for (let i = 0; i < lines.length; i++) {
-                fragment.append(parseRange(lines[i], 0, lines[i].length))
+                fragment.append(...parseRange(lines[i]))
                 if (i < lines.length-1) {
                     fragment.append(document.createElement('br'))
                 }
@@ -957,8 +961,77 @@
             return fragment
         }
 
-        function parseRange(text, start, end) {
-            return text
+        function parseRange(text) {
+            let tokens = [
+                ['***', '***'],
+                ['**', '**'],
+                ['*', '*'],
+                ['__', '__'],
+                ['~~', '~~'],
+                ['`', '`'],
+            ]
+            let nodes = []
+            
+            let i = 0
+            outer: while (i < text.length) {
+                if (text.startsWith('[', i)) {
+                    let nameEnd = text.indexOf(']', i+1)
+                    let linkStart = nameEnd != -1 ? text.indexOf('(', nameEnd+1) : -1
+                    let linkEnd = linkStart != -1 ? text.indexOf(')', linkStart+1) : -1
+
+                    if (linkStart == nameEnd + 1 && linkEnd != -1) {
+                        let a = document.createElement('a')
+                        a.href = text.slice(linkStart+1, linkEnd)
+                        a.append(...parseRange(text.slice(i+1, nameEnd)))
+                        nodes.push(a)
+                        i = linkEnd+1
+                        continue outer
+                    }
+                }
+                for (let t = 0; t < tokens.length; t++) {
+                    if (text.startsWith(tokens[t][0], i)) {
+                        let cloze = text.indexOf(tokens[t][1], i+tokens[t][0].length)
+                        if (cloze != -1) {
+                            let children = parseRange(text.slice(i+tokens[t][0].length, cloze))
+                            let e = null
+                            switch (tokens[t][0]) {
+                                case '***': 
+                                    let i = document.createElement('i')
+                                    i.append(...children)
+                                    e = document.createElement('b')
+                                    e.append(i)
+                                    break
+                                case '**': 
+                                    e = document.createElement('b')
+                                    e.append(...children)
+                                    break
+                                case '*': 
+                                    e = document.createElement('i')
+                                    e.append(...children)
+                                    break
+                                case '__': 
+                                    e = document.createElement('u')
+                                    e.append(...children)
+                                    break
+                                case '~~': 
+                                    e = document.createElement('s')
+                                    e.append(...children)
+                                    break
+                                case '`': 
+                                    e = document.createElement('code')
+                                    e.append(...children)
+                                    break
+                            }
+                            nodes.push(e)
+                            i = cloze+tokens[t][1].length
+                            continue outer
+                        }
+                    }
+                }
+                nodes.push(document.createTextNode(text[i]))
+                i++
+            }
+            return nodes
         }
 
         // Drawing Functions
