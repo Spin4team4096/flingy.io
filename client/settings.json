@@ -14,7 +14,11 @@
             {"type": "toggle", "label": "Show Leaderboard", "setting": "showLeaderboard"},
             {"type": "toggle", "label": "Show Minimap", "setting": "showMinimap"}
         ]},
-        {"type": "section", "label": "Sounds", "open": true, "color": "orange", "children": [
+        {"type": "section", "label": "Rendering", "open": true, "color": "orange", "children": [
+            {"type": "slider", "label": "Resolution Scale", "setting": "resolutionScale", "min": 0.25, "max": 2, "step": 0.25},
+            {"type": "text", "label": "Lower = more fps, but blurrier. Higher = flex your gpu", "size": 15, "opacity": 0.5}
+        ]},
+        {"type": "section", "label": "Sounds", "open": true, "color": "yellow", "children": [
             {"type": "slider", "label": "Volume", "setting": "volume", "min": 0, "max": 1, "step": 0.05}
         ]}
     ]},

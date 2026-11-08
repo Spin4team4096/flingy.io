@@ -672,18 +672,19 @@
 
         addEventListener('resize', resize)
         function resize() {
-            canvas.width = innerWidth
-            canvas.height = innerHeight
+            canvas.width = Math.round(innerWidth*devicePixelRatio*settings.resolutionScale)
+            canvas.height = Math.round(innerHeight*devicePixelRatio*settings.resolutionScale)
 
             scale = Math.max(canvas.width/(fov*16/9), canvas.height/fov)
-            uiScale = scale/Math.max(1920/(fov*16/9), 1080/fov)*settings.uiScale
+            uiScale = Math.max(innerWidth, innerHeight*16/9)/1920*settings.uiScale
 
             document.documentElement.style.setProperty('--ui', uiScale)
         }
 
         addEventListener('mousemove', e => {
-            mouseX = e.clientX-innerWidth/2
-            mouseY = e.clientY-innerHeight/2
+            let k = canvas.width/innerWidth
+            mouseX = e.clientX*k-canvas.width/2
+            mouseY = e.clientY*k-canvas.height/2
         })
         addEventListener('mousedown', e => {
             if (e.button === 0) {
@@ -1442,6 +1443,7 @@
             spinTime: 1,
             showLeaderboard: true,
             showMinimap: true,
+            resolutionScale: 1,
         }
         playerSlot = undefined
         playerColor = 'red'
