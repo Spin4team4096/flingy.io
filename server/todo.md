@@ -14,6 +14,13 @@
 - give command finish feedback on those currently silent commands, like `unregister all` would log `unregistered 7 lobbies` for example.
 - `list <parameter>`, defaults to assuming `local`, but you can also list everything in `firebase`
 
+### Auto-Update
+- the server laptop should automatically scan for github updates, and if there is one (that actually changes server code, not just a todo list, or /client /tools etc.):
+  - pulls files from git
+  - launches a new terminal, runs `go run ./server`
+  - on the existing server terminal, `close all`, wait for that to happen, then kill that terminal.
+- also, automatically starting the cloudflare tunnel upon system startup would be good.
+
 ### Random Ideas
 - Have a server health tracking system, like a command `health` and a struct that contains health info;
   - it also pings @spin4team4096 on discord when all lobbies are ongoing (will need to track this somehow) and there are no empty lobbies on this instance at all (terrible news cuz that means nobody can play due to full lobbies). maybe name it `health.allBusy` ?

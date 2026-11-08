@@ -954,6 +954,7 @@
                 ['__', '__'],
                 ['~~', '~~'],
                 ['`', '`'],
+                ['==', '=='],
             ]
             let nodes = []
             
@@ -1004,6 +1005,11 @@
                                     break
                                 case '`': 
                                     e = document.createElement('code')
+                                    e.append(...children)
+                                    break
+                                case '==':
+                                    e = document.createElement('span')
+                                    e.style.color = '#ffffff'
                                     e.append(...children)
                                     break
                             }
@@ -1113,22 +1119,22 @@
                     case 2: {
                         settingsPage = 1
                         renderPanel(ui.settings, settingsData[settingsPage])
-                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                        playSound('bwooop', 1, 0.9)
                     } break
                     case 3: {
                         settingsPage = 1
                         renderPanel(ui.settings, settingsData[settingsPage])
-                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                        playSound('bwooop', 1, 0.9)
                     } break
                     case 4: {
                         settingsPage = 1
                         renderPanel(ui.settings, settingsData[settingsPage])
-                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                        playSound('bwooop', 1, 0.9)
                     } break
                     default: {
                         settingsPage = 1
                         renderPanel(ui.settings, settingsData[settingsPage])
-                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                        playSound('bwooop', 1, 0.9)
                     } break
                 }
             }
@@ -1153,7 +1159,7 @@
                         details.open = node.open == true
                         details.append(summary)
                         summary.onclick = () => {
-                            playSound('bwooop', 1, randomFloat(0.9,1.1))
+                            playSound('bwooop', 1, details.open ? 0.9 : 1.1)
                         }
 
                         parent.append(details)
@@ -1466,11 +1472,7 @@
                 let ratio = menuBgImg.width/menuBgImg.height
                 let dw = Math.max(canvas.width, canvas.height*ratio)*1.1
                 let dh = dw/ratio
-                ctx.save()
-                ctx.translate(canvas.width, canvas.height)
-                ctx.scale(-1, -1)
                 ctx.drawImage(menuBgImg, canvas.width/2-dw/2+menuBgX, canvas.height/2-dh/2+menuBgY, dw, dh)
-                ctx.restore()
             }
 
             // render html
@@ -1656,7 +1658,7 @@
         }
 
         menuBgImg = new Image()
-        menuBgImg.src = 'images/menubackground.png'
+        menuBgImg.src = 'images/menubgflipped.png'
 
         changelogData = []
         fetch('changelog.json').then(r => r.json()).then(d => changelogData = d)

@@ -79,7 +79,14 @@ func main() {
 
 	// Main tick loop
 	ticker := time.NewTicker(time.Second / 30)
+	last := time.Now()
 	for range ticker.C {
+		now := time.Now()
+		dt := float32(now.Sub(last).Seconds() * 30)
+		last = now
+		if dt > 1.5 {
+			dt = 1.5
+		}
 		lobbiesMu.Lock()
 		for _, lobby := range lobbies {
 			lobby.Tick++
