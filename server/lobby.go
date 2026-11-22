@@ -10,35 +10,40 @@ import (
 
 // Structs
 type LobbyConfig struct {
-	ID            string
-	Name          string
-	PlayerLimit   int
-	BorderSize    int
-	MatchTime     int
-	CountdownTime int
-	BotSpinSpeed  int
-	BotAccuracy   int
-	BotPercentage float32
-	AddMoney      bool
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	PlayerLimit   int     `json:"playerLimit"`
+	BorderRadius  int     `json:"borderRadius"`
+	MatchTime     int     `json:"matchTime"`
+	CountdownTime int     `json:"countdownTime"`
+	BotSpinSpeed  int     `json:"botSpinSpeed"`
+	BotAccuracy   int     `json:"botAccuracy"`
+	BotPercentage float64 `json:"botPercentage"`
+	AddMoney      bool    `json:"addMoney"`
 }
 type Player struct {
 	Active                   bool
 	Alive                    bool
-	HP                       float32
+	HP                       float64
 	Username                 string
-	X, Y                     float32
-	SpeedX, SpeedY           float32
-	Size                     float32
-	FlailX, FlailY           float32
-	FlailSpeedX, FlailSpeedY float32
+	X, Y                     float64
+	SpeedX, SpeedY           float64
+	Radius                   float64
+	FlailX, FlailY           float64
+	FlailSpeedX, FlailSpeedY float64
 	FlailConnected           bool
-	FlailSize                float32
-	Direction                float32
-	AngularVelocity          float32
-	WorldMouseX, WorldMouseY float32
+	FlailRadius              float64
+	Direction                float64
+	AngularVelocity          float64
+	WorldMouseX, WorldMouseY float64
 	Rank                     int
 	Immune                   bool
-	Color                    string
+	ColorIndex               int
+
+	LeftMouseDown    bool
+	FlingUsed        bool
+	TimeLeftImmune   float64
+	TimeUntilRespawn float64
 }
 type Lobby struct {
 	Config          LobbyConfig
@@ -49,16 +54,18 @@ type Lobby struct {
 	StateTick       int
 	PublishedStatus int // 0 = open, 1 = busy
 	LastUpdate      time.Time
+	BorderRadius    float64
 	Player          []Player
 	Clients         map[uint8]*clientData
 }
 
 type ServerEntry struct {
-	URL         string `json:"url"`
-	Status      int    `json:"status"`
-	PlayerCount int    `json:"playerCount"`
-	CreatedAt   int64  `json:"createdAt"`
-	LastSeen    int64  `json:"lastSeen"`
+	URL         string      `json:"url"`
+	Status      int         `json:"status"`
+	PlayerCount int         `json:"playerCount"`
+	CreatedAt   int64       `json:"createdAt"`
+	LastSeen    int64       `json:"lastSeen"`
+	Config      LobbyConfig `json:"config"`
 }
 
 var (
@@ -76,11 +83,12 @@ func createLobby(config LobbyConfig) {
 	lobbiesMu.Lock()
 	if lobbies[config.ID] == nil {
 		lobbies[config.ID] = &Lobby{
-			Config:     config,
-			Running:    true,
-			LastUpdate: time.Now(),
-			Player:     make([]Player, config.PlayerLimit),
-			Clients:    make(map[uint8]*clientData),
+			Config:       config,
+			Running:      true,
+			LastUpdate:   time.Now(),
+			Player:       make([]Player, config.PlayerLimit),
+			Clients:      make(map[uint8]*clientData),
+			BorderRadius: float64(config.BorderRadius),
 		}
 	} else {
 		log.Printf("Lobby %s already exists in memory", config.ID)
@@ -132,6 +140,7 @@ func registerLobby(config LobbyConfig) error {
 			PlayerCount: 0,
 			CreatedAt:   time.Now().UnixMilli(),
 			LastSeen:    time.Now().UnixMilli(),
+			Config:      config,
 		}
 		if err := serversRef.Child(config.ID).Set(ctx, entry); err != nil {
 			return fmt.Errorf("error adding server: %w", err)
@@ -171,17 +180,17 @@ func spawnPlayer(l *Lobby, slot int) {
 	p.Active = true
 	p.Alive = true
 	p.HP = 3
-	p.X = float32(randomFloat(float64(-l.Config.BorderSize), float64(l.Config.BorderSize)))
-	p.Y = float32(randomFloat(float64(-l.Config.BorderSize), float64(l.Config.BorderSize)))
+	p.X = randomFloat(float64(-l.BorderRadius), float64(l.BorderRadius))
+	p.Y = randomFloat(float64(-l.BorderRadius), float64(l.BorderRadius))
 	p.SpeedX = 0
 	p.SpeedY = 0
-	p.Size = 10
+	p.Radius = 5
 	p.FlailX = p.X
 	p.FlailY = p.Y
 	p.FlailSpeedX = 0
 	p.FlailSpeedY = 0
 	p.FlailConnected = true
-	p.FlailSize = 5
+	p.FlailRadius = 2.5
 	p.Direction = 0
 	p.AngularVelocity = 0
 	p.WorldMouseX = 0

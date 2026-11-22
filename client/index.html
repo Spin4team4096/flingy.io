@@ -87,6 +87,7 @@
             width: 100%;
             height: 100%;
             z-index: 0;
+            image-rendering: var(--image-rendering);
         }
 
         #menu {
@@ -97,8 +98,16 @@
             align-items: center;
             justify-content: center;
             z-index: 10;
-            background: rgba(0,0,0,0.2);
+            background-color: rgba(0,0,0,0.2);
+            transition: background-color calc(0.5s*var(--transition, 1));
             border-radius: 0;
+            &.hidden {
+                background-color: transparent;
+                pointer-events: none;
+                > :not(#menu-controls, #tips), #menu-controls > :not(#play-button) {opacity: 0;}
+                #play-button {opacity: 0;}
+            }
+            > :not(#menu-controls, #tips), #menu-controls > :not(#play-button) {transition: opacity calc(0.5s*var(--transition, 1));}
         }
 
         #logo {
@@ -215,6 +224,7 @@
                 --c-outline: var(--lime-outline);
                 color: var(--c-outline);
                 box-sizing: border-box;
+                transition: opacity 1s calc(0.5s*var(--transition, 1));
                 padding: 0;
                 cursor: pointer;
                 .icon {display: none;}
@@ -514,6 +524,58 @@
                 .value {
                     margin-left: auto;
                 }
+                .options {
+                    display: flex;
+                    .choice {
+                        isolation: isolate;
+                        position: relative;
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex: 1;
+                        height: calc(40px*var(--ui));
+                        box-sizing: border-box;
+                        font-size: calc(20px*var(--ui));
+                        font-weight: bold;
+                        color: #ffffff;
+                        -webkit-text-stroke: calc(2px*var(--ui)) #000000;
+                        paint-order: stroke fill;
+                        text-align: center;
+                        padding: 0 calc(12px*var(--ui));
+                        &.active::before {
+                            background: var(--c);
+                            border-color: var(--c-outline);
+                        }
+                        &:first-child::before {
+                            border-top-left-radius: calc(8px*var(--ui));
+                            border-bottom-left-radius: calc(8px*var(--ui));
+                        }
+                        &:last-child::before {
+                            border-top-right-radius: calc(8px*var(--ui));
+                            border-bottom-right-radius: calc(8px*var(--ui));
+                        }
+                        &:not(:first-child)::before {
+                            border-left-width: calc(3px*var(--ui));
+                        }
+                        &:not(:last-child)::before {
+                            border-right-width: calc(3px*var(--ui));
+                        }
+                    }
+                    .choice::before {
+                        content: "";
+                        position: absolute;
+                        inset: 0;
+                        background: var(--white);
+                        border: calc(6px*var(--ui)) solid var(--white-outline);
+                        border-radius: 0;
+                        transform: rotate(var(--angle, 0deg));
+                        pointer-events: none;
+                    }
+                }
             }
             .subtitle {
                 font-size: calc(25px*var(--ui));
@@ -616,6 +678,7 @@
 
         ui = {
             menu: {
+                myself: document.getElementById('menu'),
                 logo: document.getElementById('logo'),
                 menuControls: {
                     colorButton: document.getElementById('color-button'),
@@ -674,6 +737,7 @@
         function resize() {
             canvas.width = Math.round(innerWidth*devicePixelRatio*settings.resolutionScale)
             canvas.height = Math.round(innerHeight*devicePixelRatio*settings.resolutionScale)
+            ctx.setTransform(1, 0, 0, 1, canvas.width/2, canvas.height/2)
 
             scale = Math.max(canvas.width/(fov*16/9), canvas.height/fov)
             uiScale = Math.max(innerWidth, innerHeight*16/9)/1920*settings.uiScale
@@ -742,6 +806,10 @@
                 toggleChangelog()
             }
         })
+
+        ui.menu.menuControls.username.addEventListener('input', () => {
+            username = ui.menu.menuControls.username.value
+        })
         
         function clearInputState() {
             keys = {}
@@ -789,6 +857,9 @@
                 angle: 0,
                 progress: 1,
             },
+            bgImage: {
+                opacity: 1, 
+            }
         }
 
         ui.menu.menuControls.colorButton.addEventListener('pointerdown', () => {
@@ -813,7 +884,7 @@
             animations.playButton.angle = 0
             animations.playButton.speed = 0
             animations.playButton.time = 0
-            playerSlot = undefined
+            playerSlot = -1
             pickServer()
         })
 
@@ -922,6 +993,17 @@
         function randomInt(num1, num2) {return Math.floor(Math.random()*(Math.max(num1, num2)-Math.min(num1, num2)+1))+Math.min(num1, num2)}
         function randomFloat(num1, num2) {return Math.random()*(Math.max(num1, num2)-Math.min(num1, num2))+Math.min(num1, num2)}
 
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value))
+        }
+
+        function degToRad(degrees) {
+            return degrees*(Math.PI/180)
+        }
+
+        function radToDeg(radians) {
+            return radians*(180/Math.PI)
+        }
 
         function playSound(name, volume = 1, pitch = 1) {
             let buffer = soundBuffers[name]
@@ -1027,6 +1109,28 @@
         }
 
         // Drawing Functions
+
+        function drawRect(x, y, width, height, fillColor, outlineColor, thickness = 0, dir = 0, roundedCorners = [0,0,0,0]) {
+            
+
+            ctx.fillRect(x-width/2, y+height/2, width, height)
+        }
+
+        function drawShape(x, y, radius, n, fillColor, outlineColor, thickness = 0, dir = 0) {
+
+        }
+
+        function drawCircle(x, y, radius, fillColor, outlineColor, thickness = 0) {
+
+        }
+
+        function drawLine(x, y, points, fillColor, outlineColor, thickness = 0, dir = 0, closed = false) {
+
+        }
+
+        function drawText(x, y, size, fillColor, outlineColor, thickness = 0, text) {
+
+        }
 
         function colorsToHex(color) {
             switch (color) {
@@ -1173,7 +1277,6 @@
                         e.textContent = node.label
                         e.style.setProperty('--c', `var(--${node.color})`)
                         e.style.setProperty('--c-outline', `var(--${node.color}-outline)`)
-                        e.style.height = node.height || '15%'
                         if (node.page) {
                             e.onclick = () => {
                                 settingsPage = node.page
@@ -1225,6 +1328,33 @@
 
                         label.append(value)
                         label.append(input)
+                        parent.append(label)
+                    } break
+                    case 'choice': {
+                        let label = document.createElement(`div`)
+                        label.className = 'label'
+                        label.textContent = node.label
+
+                        let options = document.createElement(`div`)
+                        options.className = 'options'
+
+                        for (let b = 0; b < node.options.length; b++) {
+                            let choice = document.createElement(`button`)
+                            choice.className = 'choice'
+                            choice.textContent = node.options[b].label
+                            choice.classList.toggle('active', settings[node.setting] == node.options[b].value)
+
+                            choice.onclick = () => {
+                                settings[node.setting] = node.options[b].value
+                                loadSettings()
+                                choice.classList.toggle('active', settings[node.setting] == node.options[b].value)
+                                for (let o of options.children) {o.classList.toggle('active', o == choice)}
+                            }
+
+                            options.append(choice)
+                        }
+
+                        label.append(options)
                         parent.append(label)
                     } break
 
@@ -1325,14 +1455,48 @@
         function connect(id, url) {
             if (ws) ws.close()
 
+            lobby.id = id
+            lobby.config = servers[id].config
+            lobby.player = []
+            for (let i = 0; i < lobby.config.playerLimit; i++) {
+                lobby.player.push({
+                    active: false,
+                    alive: false,
+                    hp: 0,
+                    username: '',
+                    x: 0,
+                    y: 0,
+                    speedX: 0,
+                    speedY: 0,
+                    radius: 5,
+                    flailX: 0,
+                    flailY: 0,
+                    flailSpeedX: 0,
+                    flailSpeedY: 0,
+                    flailConnected: false,
+                    flailRadius: 2.5,
+                    direction: 0,
+                    angularVelocity: 0,
+                    worldMouseX: 0,
+                    worldMouseY: 0,
+                    rank: 0,
+                    immune: false,
+                    colorIndex: 0,
+                    leftMouseDown: false,
+                })
+            }
+
             console.log(`Connecting to server: ${id} (${url})`)
-            ui.menu.message.textContent = `Connecting to lobby ${server.id.replace(/^flingy_/, '')}`
+            ui.menu.message.textContent = `Connecting to lobby ${lobby.id.replace(/^flingy_/, '')}`
             ws = new WebSocket(url)
             ws.binaryType = "arraybuffer"
             
             ws.addEventListener('open', () => {
-                console.log(`Connected to websocket of server ${id} (${url})`)
-                ws.send(encodePacket(-1, id))
+                console.log(`Connected to websocket of lobby ${id} (${url})`)
+                ws.send(encodePacket(-1, {
+                    id: id,
+                    username: username,
+                }))
             })
 
             ws.addEventListener('message', (event) => {
@@ -1340,11 +1504,12 @@
             })
 
             ws.addEventListener('close', (event) => {
-                console.log(`Disconnected from server ${id} (${url}) - Code: ${event.code}, Reason: ${event.reason}, WasClean: ${event.wasClean}`)
+                console.log(`Disconnected from lobby ${id} (${url}) - Code: ${event.code}, Reason: ${event.reason}, WasClean: ${event.wasClean}`)
+                playerSlot = -1
             })
 
             ws.addEventListener('error', () => {
-                console.log(`Connection error on server ${id} (${url})`)
+                console.log(`Connection error on lobby ${id} (${url})`)
             })
         }
 
@@ -1352,23 +1517,48 @@
             version = 1
             switch (packetType) {
                 case -1: {
-                    let text = new TextEncoder().encode(data)
+                    let lobbyID = new TextEncoder().encode(data.id)
+                    let usernameText = new TextEncoder().encode(data.username)
 
-                    let bufferSize = 2+1+text.length
+                    let bufferSize = 2+1+lobbyID.length+1+usernameText.length
                     let buffer = new ArrayBuffer(bufferSize)
                     let packet = new DataView(buffer)
                     let i = 0
                     packet.setUint8(i, version) ;i += 1
                     packet.setInt8(i, packetType) ;i += 1
 
-                    packet.setUint8(i, text.length, true) ;i += 1
-                    for (let j=0; j < text.length; j++) {
-                        packet.setUint8(i+j, text[j])
+                    packet.setUint8(i, lobbyID.length, true) ;i += 1
+                    for (let j=0; j < lobbyID.length; j++) {
+                        packet.setUint8(i+j, lobbyID[j])
                     }
-                    i += text.length
+                    i += lobbyID.length
+
+                    packet.setUint8(i, usernameText.length, true) ;i += 1
+                    for (let j=0; j < usernameText.length; j++) {
+                        packet.setUint8(i+j, usernameText[j])
+                    }
+                    i += usernameText.length
 
                     return packet
-                }
+                } break
+                case -2: {
+                    let bufferSize = 2+1+8
+                    let buffer = new ArrayBuffer(bufferSize)
+                    let packet = new DataView(buffer)
+                    let i = 0
+                    packet.setUint8(i, version) ;i += 1
+                    packet.setInt8(i, packetType) ;i += 1
+
+                    let flags = 0
+                    if (data.down) flags |= 0b00000001
+                    flags |= (data.color & 0b00011111) << 1
+                    packet.setUint8(i, flags) ;i += 1
+
+                    packet.setFloat32(i, data.x, true) ;i += 4
+                    packet.setFloat32(i, data.y, true) ;i += 4
+
+                    return packet
+                } break
                 default: console.warn(`idk what packet ${packetType} is`) ;return null
             }
         }
@@ -1381,11 +1571,12 @@
             let packetType = packet.getInt8(i) ;i += 1
             switch (packetType) {
                 case 1: {
-                    playerSlot = packet.getUint8(i) ;i += 1
+                    playerSlot = packet.getUint16(i,true) ;i += 2
                     console.log(`Connected to lobby as player ${playerSlot}`)
-                    ui.menu.message.textContent = `Connected to lobby ${server.id.replace(/^flingy_/, '')}`
+                    ui.menu.message.textContent = `Connected to lobby ${lobby.id.replace(/^flingy_/, '')}`
                     animations.playButton.result = 1
                     playSound('matchfound')
+                    scene = 1
                     animations.playButton.state = 1
                     setTimeout(() => {
                         animations.playButton.state = 2
@@ -1395,17 +1586,79 @@
                     disconnectReason = packet.getUint8(i) ;i += 1
                     console.log(`Disconnected for reason ${disconnectReason}`)
 
-                    if (disconnectReason == 1) invalidServers[server.id] = true
+                    if (disconnectReason == 1) invalidServers[lobby.id] = true
                     disconnectReasons = {
-                        1: `Lobby ${server.id.replace(/^flingy_/, '')} doesn't exist`,
-                        2: `Lobby ${server.id.replace(/^flingy_/, '')} is full`,
-                        3: `Duplicate connection to ${server.id.replace(/^flingy_/, '')}`,
+                        1: `Lobby ${lobby.id.replace(/^flingy_/, '')} doesn't exist`,
+                        2: `Lobby ${lobby.id.replace(/^flingy_/, '')} is full`,
+                        3: `Duplicate connection to ${lobby.id.replace(/^flingy_/, '')}`,
                     }
                     ui.menu.message.textContent = disconnectReasons[disconnectReason]
                     animations.playButton.result = 2
                     animations.playButton.state = 2
                     playSound('negativeaction2')
                     ws.close()
+                } break
+                case 3: {
+                    // HEADER
+                    lobby.tick = packet.getUint32(i,true) ;i += 4
+                    lobby.borderRadius = packet.getFloat32(i,true) ;i += 4
+                    let borderScale = Math.floor(32767/(lobby.borderRadius+50))
+                    let mouseScale = Math.floor(32767/(lobby.borderRadius+512))
+                    lobby.tps = packet.getUint8(i)/8 ;i += 1
+
+                    let flags = packet.getUint8(i) ;i += 1
+                    lobby.closing = (flags & 0b00000001) ? 1 : 0
+                    let shortenLeaderboard = (flags & 0b00000010) ? 1 : 0
+                    let lowLimit = (flags & 0b00000100) ? 1 : 0
+                    lobby.state = (flags & 0b00011000) >> 3
+
+                    // PLAYERS
+                    for (let p of lobby.player) {p.active = false}
+                    let count = packet.getUint16(i,true) ;i += 2
+                    for (let n = 0; n < count; n++) {
+                        let slot = -1
+                        if (lowLimit) {
+                            slot = packet.getUint8(i) ;i += 1
+                            lobby.player[slot].rank = packet.getUint8(i) ;i += 1
+                        } else {
+                            slot = packet.getUint16(i,true) ;i += 2
+                            lobby.player[slot].rank = packet.getUint16(i,true) ;i += 2
+                        }
+
+                        let p = lobby.player[slot]
+                        p.active = true
+                        p.x = packet.getInt16(i,true)/borderScale ;i += 2
+                        p.y = packet.getInt16(i,true)/borderScale ;i += 2
+                        p.speedX = packet.getInt16(i,true)/800 ;i += 2
+                        p.speedY = packet.getInt16(i,true)/800 ;i += 2
+                        p.flailX = packet.getInt16(i,true)/borderScale ;i += 2
+                        p.flailY = packet.getInt16(i,true)/borderScale ;i += 2
+                        p.flailSpeedX = packet.getInt16(i,true)/400 ;i += 2
+                        p.flailSpeedY = packet.getInt16(i,true)/400 ;i += 2
+                        p.direction = packet.getInt16(i,true)/182 ;i += 2
+                        p.angularVelocity = packet.getInt16(i,true)/256 ;i += 2
+                        p.worldMouseX = packet.getInt16(i,true)/mouseScale ;i += 2
+                        p.worldMouseY = packet.getInt16(i,true)/mouseScale ;i += 2
+                        p.hp = packet.getUint8(i)/8 ;i += 1
+                        p.flailRadius = packet.getUint8(i)/5 ;i += 1
+                        let flags = packet.getUint8(i) ;i += 1
+                        p.alive = (flags & 0b00000001) ? 1 : 0
+                        p.flailConnected = (flags & 0b00000010) ? 1 : 0
+                        p.immune = (flags & 0b00000100) ? 1 : 0
+                        p.colorIndex = (flags & 0b11111000) >> 3
+                    }
+                } break
+                case 4: {
+                    let slot = packet.getUint16(i,true) ;i += 2
+                    let length = packet.getUint8(i) ;i += 1
+                    lobby.player[slot].username = new TextDecoder().decode(new Uint8Array(data,i,length)) ;i += length
+                } break
+                case 5: {
+                    let count = packet.getUint16(i,true) ;i += 2
+                    for (let slot = 0; slot < count; slot++) {
+                        let length = packet.getUint8(i) ;i += 1
+                        lobby.player[slot].username = new TextDecoder().decode(new Uint8Array(data,i,length)) ;i += length
+                    }
                 } break
                 default: console.warn(`idk what packet ${packetType} is`) ;break
             }
@@ -1417,10 +1670,14 @@
         servers = {}
         invalidServers = {}
         lobby = {
+            id: null,
             config: {},
             tick: -1,
             running: false,
             closing: false,
+            state: 0,
+            tps: 0,
+            borderRadius: 0,
             player: [],
         }
         tips = [
@@ -1444,8 +1701,9 @@
             showLeaderboard: true,
             showMinimap: true,
             resolutionScale: 1,
+            imageScaling: 'auto',
         }
-        playerSlot = undefined
+        playerSlot = -1
         playerColor = 'red'
         playerColors = ['red', 'coral', 'orange', 'yellow', 'lime', 'green', 'leaf', 'cyan', 'blue', 'navy', 'purple', 'magenta', 'pink', 'burgundy', 'maroon', 'brown', 'tan', 'white', 'gray', 'black']
         unlockedColors = []
@@ -1455,6 +1713,15 @@
         settingsPage = 0
         menuBgX = 0
         menuBgY = 0
+        cameraX = 0
+        cameraY = 0
+        cameraTargetX = 0
+        cameraTargetY = 0
+        cameraSpeed = 0
+        deathScreenOpacity = 0
+        inputTimer = 0
+        scene = 0
+        deathScreenOpacity = 0
         ws = null
         resize()
         
@@ -1463,10 +1730,13 @@
         lastFrame = performance.now()
 
         function frame(now) {
+            requestAnimationFrame(frame)
+
             let dt = Math.min((now-lastFrame)/1000*30, 1.5)
             lastFrame = now
 
             // render shit
+            ctx.clearRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height)
 
             menuBgX += (-mouseX*0.03-menuBgX)*(1-Math.pow(0.64,dt))
             menuBgY += (-mouseY*0.03-menuBgY)*(1-Math.pow(0.64,dt))
@@ -1474,7 +1744,13 @@
                 let ratio = menuBgImg.width/menuBgImg.height
                 let dw = Math.max(canvas.width, canvas.height*ratio)*1.1
                 let dh = dw/ratio
-                ctx.drawImage(menuBgImg, canvas.width/2-dw/2+menuBgX, canvas.height/2-dh/2+menuBgY, dw, dh)
+                animations.bgImage.opacity += ((scene == 0 ? 1 : 0)*2-1)*(dt/(15*settings.animationTime))
+                animations.bgImage.opacity = clamp(animations.bgImage.opacity, 0, 1)
+                if (animations.bgImage.opacity != 0) {
+                    ctx.globalAlpha = animations.bgImage.opacity
+                    ctx.drawImage(menuBgImg, -dw/2+menuBgX, -dh/2+menuBgY, dw, dh)
+                    ctx.globalAlpha = 1
+                }
             }
 
             // render html
@@ -1559,8 +1835,8 @@
                             animations.playButton.time += dt
                             if (animations.playButton.time >= 3*30 && playerSlot == undefined) {
                                 animations.playButton.result = 2
-                                invalidServers[server.id] = true
-                                ui.menu.message.textContent = `failed to connect to ${server.id.replace(/^flingy_/, '')}`
+                                invalidServers[lobby.id] = true
+                                ui.menu.message.textContent = `failed to connect to ${lobby.id.replace(/^flingy_/, '')}`
                                 animations.playButton.state = 2
                                 playSound('negativeaction2')
                                 ws.close()
@@ -1608,7 +1884,70 @@
                 if (animations.discordButton.progress >= 1) {animations.discordButton.angle = 0}
             }
 
-            requestAnimationFrame(frame)
+            ui.menu.myself.classList.toggle('hidden', scene != 0)
+            if (scene != 0) {ui.menu.tips.style.opacity = 0}
+
+            if (playerSlot >= 0) {
+                // scene calc
+                let p = lobby.player[playerSlot]
+                if (p.alive) {
+                    scene = 1
+                } else if (p.hp > 0) {
+                    scene = 2
+                } else {
+                    scene = 3
+                }
+
+                // camera
+                if (scene == 0) {
+                    cameraX = 0
+                    cameraY = 0
+                    cameraTargetX = cameraX
+                    cameraTargetY = cameraY
+                } else if (scene == 1 || scene == 2) {
+                    cameraX = lobby.player[playerSlot].x
+                    cameraY = lobby.player[playerSlot].y
+                    cameraTargetX = cameraX
+                    cameraTargetY = cameraY
+                    deathScreenOpacity = 0
+                } else if (scene == 3) {
+                    if (isKeyPressed('w') || isKeyPressed('s') || isKeyPressed('a') || isKeyPressed('d') || isKeyPressed('p')) {
+                        deathScreenOpacity -= 0.03
+                    } else {
+                        deathScreenOpacity += 0.02
+                    }
+                    deathScreenOpacity = clamp(deathScreenOpacity, -1, 1)
+
+                    if (isKeyPressed('w')) cameraTargetY -= 5
+                    if (isKeyPressed('s')) cameraTargetY += 5
+                    if (isKeyPressed('a')) cameraTargetX -= 5
+                    if (isKeyPressed('d')) cameraTargetX += 5
+
+                    cameraX += (cameraTargetX-cameraX)/5
+                    cameraY += (cameraTargetY-cameraY)/5
+                }
+
+                // input
+                worldMouseX = (mouseX/scale)+cameraX
+                worldMouseY = (mouseY/scale)+cameraY
+
+                // input packet
+                inputTimer += dt
+                if (inputTimer >= 1) {
+                    inputTimer -= 1
+
+                    ws.send(encodePacket(-2, {
+                        down: leftMouseDown,
+                        x: worldMouseX,
+                        y: worldMouseY,
+                        color: playerColors.indexOf(playerColor) || 0,
+                    }))
+                }
+            } else {
+                scene = 0
+            }
+
+
         }
 
         function localStorageLoop() {
@@ -1651,7 +1990,7 @@
 
             setInterval(() => {
                 setStoredKey('flingy_v2_version', 'v2.0.0+')
-                setStoredKey('flingy_v2_username', ui.menu.menuControls.username.value || 'unnamed')
+                setStoredKey('flingy_v2_username', username)
                 setStoredKey('flingy_v2_coins', coins.toString())
                 setStoredKey('flingy_v2_playerColor', playerColor)
                 setStoredKey('flingy_v2_unlockedColors', JSON.stringify(unlockedColors))
@@ -1663,17 +2002,17 @@
         menuBgImg.src = 'images/menubgflipped.png'
 
         changelogData = []
-        fetch('changelog.json').then(r => r.json()).then(d => changelogData = d)
+        fetch('changelog.json', {cache: 'no-store'}).then(r => r.json()).then(d => changelogData = d)
         if (changelogData) {console.log(`loaded changelog data`)} else {console.log(`couldn't load changelog data`)}
 
         settingsData = []
-        fetch('settings.json').then(r => r.json()).then(d => settingsData = d)
+        fetch('settings.json', {cache: 'no-store'}).then(r => r.json()).then(d => settingsData = d)
         if (settingsData) {console.log(`loaded settings data`)} else {console.log(`couldn't load settings data`)}
 
         async function loadSounds() {
             for (let name of soundNames) {
                 try {
-                    let response = await fetch(`sounds/${name}.ogg`)
+                    let response = await fetch(`sounds/${name}.ogg`, {cache: 'no-store'})
                     soundBuffers[name] = await audio.decodeAudioData(await response.arrayBuffer())
                 } catch (e) {
                     console.warn(`couldn't load ${name}`, e)
@@ -1686,6 +2025,7 @@
             resize()
             masterGain.gain.value = settings.volume
             document.documentElement.style.setProperty('--transition', settings.animationTime)
+            document.documentElement.style.setProperty('--image-rendering', settings.imageScaling)
         }
 
         requestAnimationFrame(frame)
@@ -1693,14 +2033,14 @@
         loadSounds()
 
         tipIndex = 0
-        ui.menu.tips.textContent = tips[tipIndex]
+        ui.menu.tips.replaceChildren(parseMarkdown(tips[tipIndex]))
         ui.menu.tips.style.opacity = 1
         setInterval(() => {
             ui.menu.tips.style.opacity = 0
             setTimeout(() => {
                 tipIndex = (tipIndex+1)%tips.length
                 ui.menu.tips.replaceChildren(parseMarkdown(tips[tipIndex]))
-                ui.menu.tips.style.opacity = 1
+                if (scene == 0) {ui.menu.tips.style.opacity = 1}
             }, 1000*settings.animationTime)
         }, 10000)
     </script>

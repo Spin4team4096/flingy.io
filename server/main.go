@@ -82,13 +82,14 @@ func main() {
 	last := time.Now()
 	for range ticker.C {
 		now := time.Now()
-		dt := float32(now.Sub(last).Seconds() * 30)
+		dt := now.Sub(last).Seconds() * 30
 		last = now
 		if dt > 1.5 {
 			dt = 1.5
 		}
 		lobbiesMu.Lock()
 		for _, lobby := range lobbies {
+
 			lobby.Tick++
 			lobby.StateTick++
 
@@ -109,12 +110,23 @@ func main() {
 					lobby.State = 1
 					lobby.StateTick = 0
 					log.Printf("Starting Match")
+
+					packet := encodePacket(5, lobby) // send all usernames
+					for _, c := range lobby.Clients {
+						c.send(1, packet)
+					}
 				}
 			case 1:
 				if playerCount <= 1 {
 					lobby.State = 0
 					lobby.StateTick = 0
 					log.Printf("Not enough players anymore")
+
+					packet := encodePacket(5, lobby)
+					for _, c := range lobby.Clients {
+						c.send(1, packet)
+					}
+
 					// reset lobby data too, idk how
 				} else if lobby.StateTick >= lobby.Config.CountdownTime*30 {
 					lobby.State = 2
@@ -122,6 +134,12 @@ func main() {
 					// shrink players
 					// broadcast game started
 					log.Printf("Match Started")
+
+					packet := encodePacket(5, lobby)
+					for _, c := range lobby.Clients {
+						c.send(1, packet)
+					}
+
 					// spawn game started sound (distanceless)
 				} else if playersAlive > 0 {
 					n := 0
@@ -129,8 +147,8 @@ func main() {
 						if lobby.Player[i].HP > 0 {
 							n++
 							angle := 2 * math.Pi * (float64(n) / float64(playersAlive))
-							tx := float32(math.Cos(angle) * float64(lobby.Config.BorderSize) * 0.8)
-							ty := float32(math.Sin(angle) * float64(lobby.Config.BorderSize) * 0.8)
+							tx := math.Cos(angle) * float64(lobby.BorderRadius) * 0.8
+							ty := math.Sin(angle) * float64(lobby.BorderRadius) * 0.8
 
 							lobby.Player[i].X += (tx - lobby.Player[i].X) * 0.05
 							lobby.Player[i].Y += (ty - lobby.Player[i].Y) * 0.05
@@ -173,9 +191,88 @@ func main() {
 
 				if p.Alive {
 					if p.Immune {
-						// fuck, i forgot to add immunity timer in struct. will do later
+						p.TimeLeftImmune -= dt
+						if p.TimeLeftImmune <= 0 {
+							p.Immune = false
+						}
 					}
 
+					// direction
+					diff := math.Remainder(directionTo(p.WorldMouseX, p.WorldMouseY, p.X, p.Y)-p.Direction, 360)
+
+					if p.FlailConnected {
+						p.AngularVelocity = p.AngularVelocity*math.Pow(0.9, dt) + (diff*0.03/(1+math.Sqrt(p.FlailRadius*2)/10))*dt
+					} else {
+						p.AngularVelocity = p.AngularVelocity*math.Pow(0.9, dt) + (diff*0.05)*dt
+					}
+					p.Direction += p.AngularVelocity * dt
+
+					sin, cos := math.Sincos(degToRad(p.Direction))
+
+					// fling
+					if p.FlailConnected && p.LeftMouseDown && !p.FlingUsed && lobby.State == 2 {
+						p.FlailConnected = false
+						p.SpeedX += -cos * (7.5 + p.FlailRadius*0.15)
+						p.SpeedY += -sin * (7.5 + p.FlailRadius*0.15)
+						p.FlingUsed = true
+						p.Immune = false
+					}
+					if !p.LeftMouseDown {
+						p.FlingUsed = false
+					}
+
+					if p.FlailConnected {
+						p.FlailRadius = clamp(p.FlailRadius+((math.Abs(p.AngularVelocity)/100-0.05)*dt), 2.5, 50)
+					} else {
+						if p.FlailRadius > 2.5 {
+							p.FlailRadius = clamp(p.FlailRadius-(0.15*dt), 0, 50)
+						} else {
+							p.FlailRadius = clamp(p.FlailRadius-(0.05*dt), 0, 50)
+						}
+
+						if p.FlailRadius <= 0 || p.FlailSpeedX*p.FlailSpeedX+p.FlailSpeedY*p.FlailSpeedY < 0.25 {
+							p.FlailConnected = true
+							p.FlingUsed = true
+						}
+					}
+
+					// movement
+					if (p.WorldMouseX-p.X)*(p.WorldMouseX-p.X)+(p.WorldMouseY-p.Y)*(p.WorldMouseY-p.Y) > 25*25 {
+						p.SpeedX += cos * 0.3 * dt
+						p.SpeedY += sin * 0.3 * dt
+					}
+
+					p.SpeedX *= math.Pow(0.92, dt)
+					p.SpeedY *= math.Pow(0.92, dt)
+					p.X += p.SpeedX * dt
+					p.Y += p.SpeedY * dt
+
+					r := math.Hypot(p.X, p.Y)
+					if max := float64(lobby.BorderRadius) - p.Radius; r > max {
+						p.X *= max / r
+						p.Y *= max / r
+					}
+
+					// flail
+					if p.FlailConnected {
+						oldX, oldY := p.FlailX, p.FlailY
+						p.FlailX = p.X + cos*(20+p.Radius+p.FlailRadius)
+						p.FlailY = p.Y + sin*(20+p.Radius+p.FlailRadius)
+						p.FlailSpeedX = (p.FlailX - oldX) / dt
+						p.FlailSpeedY = (p.FlailY - oldY) / dt
+					} else {
+						p.FlailSpeedX *= math.Pow(0.96, dt)
+						p.FlailSpeedY *= math.Pow(0.96, dt)
+						p.FlailX += p.FlailSpeedX * dt
+						p.FlailY += p.FlailSpeedY * dt
+					}
+				}
+			}
+
+			if len(lobby.Clients) > 0 {
+				packet := encodePacket(3, lobby)
+				for _, c := range lobby.Clients {
+					c.send(3, packet)
 				}
 			}
 
@@ -196,4 +293,24 @@ func randomInt(min, max int) int {
 
 func randomFloat(min, max float64) float64 {
 	return rand.Float64()*(max-min) + min
+}
+
+func degToRad(deg float64) float64 {
+	return deg * math.Pi / 180
+}
+
+func radToDeg(rad float64) float64 {
+	return rad * 180 / math.Pi
+}
+
+func directionTo(nx, ny, ox, oy float64) float64 {
+	return radToDeg(math.Atan2(ny-oy, nx-ox))
+}
+
+func clamp(v, lo, hi float64) float64 {
+	return math.Max(lo, math.Min(hi, v))
+}
+
+func isFinite(v float64) bool {
+	return !math.IsNaN(v) && !math.IsInf(v, 0)
 }

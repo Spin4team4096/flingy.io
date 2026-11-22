@@ -77,24 +77,164 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 //		1 = nonexistent lobby
 //		2 = full
 //		3 = duplicate
+// 3: Lobby Data: Sends data about the game
+// 4: One Username: When a player joins, send that username to all clients
+// 5: All usernames: When game state changes (0>1, 1>0, 1>2), send all usernames
 
 // -1: Join Request: Adds player to requested lobby
+// -2: Client Data: Client inputs go here
 
 func encodePacket(packetType int, data any) []byte {
 	version := 1 // REMEMBER TO KEEP SYNCED WITH CLIENT
 	switch packetType {
 	case 1:
-		w := newPacketWriter(4)
+		w := newPacketWriter(2 + 2)
 		w.u8(byte(version))
 		w.u8(byte(packetType))
-		w.u8(uint8(data.(uint8)))
+		w.u16(uint16(data.(uint16)))
 		return w.done()
 	case 2:
-		w := newPacketWriter(4)
+		w := newPacketWriter(2 + 1)
 		w.u8(byte(version))
 		w.u8(byte(packetType))
 		w.u8(uint8(data.(uint8)))
 		return w.done()
+	case 3:
+		lobby := data.(*Lobby)
+
+		playerCount := 0
+		playersAlive := 0
+		for i := range lobby.Player {
+			if lobby.Player[i].Active {
+				playerCount++
+			}
+			if lobby.Player[i].HP > 0 {
+				playersAlive++
+			}
+		}
+
+		shortenLeaderboard := false
+		lowLimit := false
+		count := 0
+		if playerCount > 64 {
+			// fucking shit we gotta compress this leaderboard lol
+			shortenLeaderboard = true
+			count = playersAlive
+		} else {
+			count = playerCount
+		}
+		if lobby.Config.PlayerLimit <= 255 {
+			lowLimit = true
+		}
+
+		size := 2 + 12 + (29 * count)
+		if !lowLimit {
+			size += 2 * count
+		}
+		w := newPacketWriter(size)
+		w.u8(byte(version))
+		w.u8(byte(packetType))
+
+		// HEADER
+		w.u32(uint32(lobby.Tick))
+		border := float32(lobby.BorderRadius)
+		w.f32(border)
+		borderLimit := (float64(border) + 50)
+		borderScale := math.Floor(32767 / borderLimit)
+		mouseLimit := (float64(border) + 512)
+		mouseScale := math.Floor(32767 / mouseLimit)
+		w.u8(byte(clamp(30*8, 0, 255))) // add tps counter here
+
+		flags := byte(0)
+		if lobby.Closing {
+			flags |= 1 << 0
+		}
+		if shortenLeaderboard {
+			flags |= 1 << 1
+		}
+		if lowLimit {
+			flags |= 1 << 2
+		}
+		flags |= (byte(lobby.State) & 0b11) << 3
+		w.u8(byte(flags))
+
+		// PLAYERS
+		w.u16(uint16(count))
+		for i := range lobby.Player {
+			if !shortenLeaderboard && !lobby.Player[i].Active {
+				continue
+			}
+			if shortenLeaderboard && lobby.Player[i].HP <= 0 {
+				continue
+			}
+
+			p := lobby.Player[i]
+
+			if lowLimit {
+				w.u8(byte(i))
+				w.u8(byte(p.Rank))
+			} else {
+				w.u16(uint16(i))
+				w.u16(uint16(p.Rank))
+			}
+
+			w.i16(int16(math.Round(clamp(p.X, -borderLimit, borderLimit) * borderScale)))
+			w.i16(int16(math.Round(clamp(p.Y, -borderLimit, borderLimit) * borderScale)))
+			w.i16(int16(math.Round(p.SpeedX * 800))) // range +-40
+			w.i16(int16(math.Round(p.SpeedY * 800)))
+			w.i16(int16(math.Round(clamp(p.FlailX, -borderLimit, borderLimit) * borderScale)))
+			w.i16(int16(math.Round(clamp(p.FlailY, -borderLimit, borderLimit) * borderScale)))
+			w.i16(int16(math.Round(p.FlailSpeedX * 400))) // range +-80
+			w.i16(int16(math.Round(p.FlailSpeedY * 400)))
+			w.i16(int16(math.Round(math.Remainder(p.Direction, 360) * 182)))
+			w.i16(int16(math.Round(p.AngularVelocity * 256))) // range +-128
+			w.i16(int16(math.Round(clamp(p.WorldMouseX, -mouseLimit, mouseLimit) * mouseScale)))
+			w.i16(int16(math.Round(clamp(p.WorldMouseY, -mouseLimit, mouseLimit) * mouseScale)))
+			w.u8(byte(math.Round(clamp(p.HP, 0, 31.875) * 8)))
+			w.u8(byte(math.Round(clamp(p.FlailRadius, 0, 51) * 5)))
+
+			flags := byte(0)
+			if p.Alive {
+				flags |= 1 << 0
+			}
+			if p.FlailConnected {
+				flags |= 1 << 1
+			}
+			if p.Immune {
+				flags |= 1 << 2
+			}
+			flags |= byte(p.ColorIndex&0b11111) << 3
+			w.u8(flags)
+		}
+
+		return w.done()
+	case 4:
+		d := data.(usernamePacket)
+
+		w := newPacketWriter(2 + 2 + 1 + len(d.username))
+		w.u8(byte(version))
+		w.u8(byte(packetType))
+		w.u16(uint16(d.slot))
+		w.str(string(d.username))
+		return w.done()
+	case 5:
+		lobby := data.(*Lobby)
+
+		size := 2 + 2
+		for i := range lobby.Player {
+			size += 1 + len(lobby.Player[i].Username)
+		}
+		w := newPacketWriter(size)
+		w.u8(byte(version))
+		w.u8(byte(packetType))
+
+		w.u16(uint16(lobby.Config.PlayerLimit))
+		for i := range lobby.Player {
+			w.str(string(lobby.Player[i].Username))
+		}
+
+		return w.done()
+
 	}
 	return nil
 }
@@ -114,6 +254,12 @@ func decodePacket(c *clientData, data []byte) (err error) {
 		switch packetType {
 		case -1:
 			lobbyID := r.str()
+			username := r.str()
+			runes := []rune(username)
+			if len(runes) > 20 {
+				runes = runes[:20]
+			}
+			username = string(runes)
 
 			if c.slot >= 0 {
 				c.send(1, encodePacket(2, uint8(3)))
@@ -123,15 +269,20 @@ func decodePacket(c *clientData, data []byte) (err error) {
 			lobbiesMu.Lock()
 			lobby := lobbies[lobbyID]
 			slot := -1
+			playerCount := 0
 			if lobby != nil {
 				for i := range lobby.Player {
-					if !lobby.Player[i].Active {
+					if lobby.Player[i].Active {
+						playerCount++
+						continue
+					}
+					if slot == -1 {
 						spawnPlayer(lobby, i)
-						lobby.Player[i].Username = "unnamed"
-						lobby.Player[i].Color = "red"
+						lobby.Player[i].Username = username
+						lobby.Player[i].ColorIndex = 0
 						slot = i
 						lobby.Clients[uint8(slot)] = c
-						break
+						playerCount++
 					}
 				}
 			} else {
@@ -139,17 +290,50 @@ func decodePacket(c *clientData, data []byte) (err error) {
 				c.send(1, encodePacket(2, uint8(1)))
 				return nil
 			}
-			lobbiesMu.Unlock()
 
 			if slot < 0 {
+				lobbiesMu.Unlock()
 				c.send(1, encodePacket(2, uint8(2)))
 				return nil
 			}
 
-			c.slot = int8(slot)
+			c.slot = int16(slot)
 			c.lobbyID = lobbyID
+			c.send(1, encodePacket(5, lobby))
 
-			c.send(1, encodePacket(1, uint8(slot)))
+			if playerCount < 64 {
+				for _, other := range lobby.Clients {
+					if other != c {
+						other.send(2, encodePacket(4, usernamePacket{slot: uint16(slot), username: username}))
+					}
+				}
+			}
+
+			c.send(1, encodePacket(1, uint16(slot)))
+			lobbiesMu.Unlock()
+			return nil
+		case -2:
+			flags := r.u8()
+			down := (flags)&1 != 0
+			color := (flags >> 1) & 0b11111
+
+			x := float64(r.f32())
+			y := float64(r.f32())
+
+			if !isFinite(x) || !isFinite(y) {
+				return nil
+			}
+
+			lobbiesMu.Lock()
+			lobby := lobbies[c.lobbyID]
+			slot := c.slot
+
+			lobby.Player[slot].LeftMouseDown = down
+			lobby.Player[slot].ColorIndex = int(color)
+			lobby.Player[slot].WorldMouseX = x
+			lobby.Player[slot].WorldMouseY = y
+			lobbiesMu.Unlock()
+
 			return nil
 		default:
 			return fmt.Errorf("bad packet type: %d", packetType)
@@ -310,7 +494,7 @@ type clientData struct {
 	conn    *websocket.Conn
 	ctx     context.Context
 	lobbyID string
-	slot    int8
+	slot    int16
 	queue   queue
 	done    chan struct{}
 }
@@ -328,6 +512,11 @@ type notifParams struct {
 	p2      uint8
 	text    string
 	color   uint8
+}
+
+type usernamePacket struct {
+	slot     uint16
+	username string
 }
 
 // Specific Functions
