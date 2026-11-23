@@ -658,7 +658,9 @@
         masterGain = audio.createGain()
         masterGain.connect(audio.destination)
         let soundBuffers = {}
-        let soundNames = ['achievementmc','bonus','bwooop','eliminated','gamestart','hit1','hit2','lose','matchfound','negativeaction','negativeaction2','ping','pointsadd','sling','success','throw','uiclick','uiclick2','uipopup','uipopup2','uipopupclose','victory']
+        // all sounds:
+        //let soundFiles = ['achievementmc.ogg','bonus.ogg','bwooop.opus','eliminated.ogg','gamestart.ogg','hit1.ogg','hit2.ogg','lose.ogg','matchfound.ogg','negativeaction.ogg','negativeaction2.ogg','ping.ogg','pointsadd.ogg','sling.ogg','success.ogg','throw.ogg','uiclick.ogg','uiclick2.ogg','uipopup.ogg','uipopup2.ogg','uipopupclose.ogg','victory.ogg']
+        let soundFiles = ['bonus.opus','bwooop.opus','matchfound2.opus','negativeaction.opus','negativeaction2.opus']
 
         // UI Setup
         fov = 480
@@ -737,12 +739,12 @@
         function resize() {
             canvas.width = Math.round(innerWidth*devicePixelRatio*settings.resolutionScale)
             canvas.height = Math.round(innerHeight*devicePixelRatio*settings.resolutionScale)
-            ctx.setTransform(1, 0, 0, 1, canvas.width/2, canvas.height/2)
 
             scale = Math.max(canvas.width/(fov*16/9), canvas.height/fov)
             uiScale = Math.max(innerWidth, innerHeight*16/9)/1920*settings.uiScale
 
             document.documentElement.style.setProperty('--ui', uiScale)
+            ctx.setTransform(scale, 0, 0, scale, canvas.width/2, canvas.height/2)
         }
 
         addEventListener('mousemove', e => {
@@ -1111,9 +1113,15 @@
         // Drawing Functions
 
         function drawRect(x, y, width, height, fillColor, outlineColor, thickness = 0, dir = 0, roundedCorners = [0,0,0,0]) {
-            
-
-            ctx.fillRect(x-width/2, y+height/2, width, height)
+            ctx.save()
+            ctx.fillStyle = fillColor
+            ctx.strokeStyle = outlineColor
+            ctx.lineWidth = thickness
+            ctx.translate(x, y)
+            if (dir != 0) {ctx.rotate(degToRad(dir))}
+            ctx.fillRect(-width/2, -height/2, width, height)
+            if (thickness > 0) {ctx.strokeRect(-width/2+thickness/2, -height/2+thickness/2, width-thickness, height-thickness)}
+            ctx.restore()
         }
 
         function drawShape(x, y, radius, n, fillColor, outlineColor, thickness = 0, dir = 0) {
@@ -1575,7 +1583,7 @@
                     console.log(`Connected to lobby as player ${playerSlot}`)
                     ui.menu.message.textContent = `Connected to lobby ${lobby.id.replace(/^flingy_/, '')}`
                     animations.playButton.result = 1
-                    playSound('matchfound')
+                    playSound('matchfound2', 0.5)
                     scene = 1
                     animations.playButton.state = 1
                     setTimeout(() => {
@@ -1736,19 +1744,27 @@
             lastFrame = now
 
             // render shit
-            ctx.clearRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height)
+            ctx.clearRect(-canvas.width/scale/2, -canvas.height/scale/2, canvas.width/scale, canvas.height/scale)
 
+            for (let i = 0; i < lobby.config.playerLimit; i++) {
+                let p = lobby.player[i]
+                // if (!p.active) continue
+                // if (!p.alive) continue
+                drawRect(p.x-cameraX, p.y-cameraY, 10, 10, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+                drawRect(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*2, p.flailRadius*2, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+            }
+            
             menuBgX += (-mouseX*0.03-menuBgX)*(1-Math.pow(0.64,dt))
             menuBgY += (-mouseY*0.03-menuBgY)*(1-Math.pow(0.64,dt))
             if (menuBgImg.complete && menuBgImg.naturalWidth) {
                 let ratio = menuBgImg.width/menuBgImg.height
-                let dw = Math.max(canvas.width, canvas.height*ratio)*1.1
+                let dw = Math.max(canvas.width, canvas.height*ratio)*1.1/scale
                 let dh = dw/ratio
                 animations.bgImage.opacity += ((scene == 0 ? 1 : 0)*2-1)*(dt/(15*settings.animationTime))
                 animations.bgImage.opacity = clamp(animations.bgImage.opacity, 0, 1)
                 if (animations.bgImage.opacity != 0) {
                     ctx.globalAlpha = animations.bgImage.opacity
-                    ctx.drawImage(menuBgImg, -dw/2+menuBgX, -dh/2+menuBgY, dw, dh)
+                    ctx.drawImage(menuBgImg, -dw/2+menuBgX/scale, -dh/2+menuBgY/scale, dw, dh)
                     ctx.globalAlpha = 1
                 }
             }
@@ -1926,7 +1942,7 @@
                     cameraX += (cameraTargetX-cameraX)/5
                     cameraY += (cameraTargetY-cameraY)/5
                 }
-
+                
                 // input
                 worldMouseX = (mouseX/scale)+cameraX
                 worldMouseY = (mouseY/scale)+cameraY
@@ -2010,12 +2026,13 @@
         if (settingsData) {console.log(`loaded settings data`)} else {console.log(`couldn't load settings data`)}
 
         async function loadSounds() {
-            for (let name of soundNames) {
+            for (let file of soundFiles) {
                 try {
-                    let response = await fetch(`sounds/${name}.ogg`, {cache: 'no-store'})
+                    let name = file.replace(/\.[^.]+$/, '')
+                    let response = await fetch(`sounds/${file}`, {cache: 'no-store'})
                     soundBuffers[name] = await audio.decodeAudioData(await response.arrayBuffer())
                 } catch (e) {
-                    console.warn(`couldn't load ${name}`, e)
+                    console.warn(`couldn't load ${file}`, e)
                 }
             }
             console.log(`loaded ${Object.keys(soundBuffers).length} sounds`)
