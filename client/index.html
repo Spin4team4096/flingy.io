@@ -1743,32 +1743,6 @@
             let dt = Math.min((now-lastFrame)/1000*30, 1.5)
             lastFrame = now
 
-            // render shit
-            ctx.clearRect(-canvas.width/scale/2, -canvas.height/scale/2, canvas.width/scale, canvas.height/scale)
-
-            for (let i = 0; i < lobby.config.playerLimit; i++) {
-                let p = lobby.player[i]
-                // if (!p.active) continue
-                // if (!p.alive) continue
-                drawRect(p.x-cameraX, p.y-cameraY, 10, 10, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
-                drawRect(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*2, p.flailRadius*2, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
-            }
-            
-            menuBgX += (-mouseX*0.03-menuBgX)*(1-Math.pow(0.64,dt))
-            menuBgY += (-mouseY*0.03-menuBgY)*(1-Math.pow(0.64,dt))
-            if (menuBgImg.complete && menuBgImg.naturalWidth) {
-                let ratio = menuBgImg.width/menuBgImg.height
-                let dw = Math.max(canvas.width, canvas.height*ratio)*1.1/scale
-                let dh = dw/ratio
-                animations.bgImage.opacity += ((scene == 0 ? 1 : 0)*2-1)*(dt/(15*settings.animationTime))
-                animations.bgImage.opacity = clamp(animations.bgImage.opacity, 0, 1)
-                if (animations.bgImage.opacity != 0) {
-                    ctx.globalAlpha = animations.bgImage.opacity
-                    ctx.drawImage(menuBgImg, -dw/2+menuBgX/scale, -dh/2+menuBgY/scale, dw, dh)
-                    ctx.globalAlpha = 1
-                }
-            }
-
             // render html
 
             remainingColors = playerColors.filter(c => !unlockedColors.includes(c))
@@ -1963,6 +1937,35 @@
                 scene = 0
             }
 
+
+
+            // render shit
+            ctx.clearRect(-canvas.width/scale/2, -canvas.height/scale/2, canvas.width/scale, canvas.height/scale)
+
+            if (playerSlot >= 0) {
+                for (let i = 0; i < lobby.config.playerLimit; i++) {
+                    let p = lobby.player[i]
+                    if (!p.active) continue
+                    if (!p.alive) continue
+                    drawRect(p.x-cameraX, p.y-cameraY, 10, 10, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+                    drawRect(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*2, p.flailRadius*2, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+                }
+            }
+            
+            menuBgX += (-mouseX*0.03-menuBgX)*(1-Math.pow(0.64,dt))
+            menuBgY += (-mouseY*0.03-menuBgY)*(1-Math.pow(0.64,dt))
+            if (menuBgImg.complete && menuBgImg.naturalWidth) {
+                let ratio = menuBgImg.width/menuBgImg.height
+                let dw = Math.max(canvas.width, canvas.height*ratio)*1.1/scale
+                let dh = dw/ratio
+                animations.bgImage.opacity += ((scene == 0 ? 1 : 0)*2-1)*(dt/(15*settings.animationTime))
+                animations.bgImage.opacity = clamp(animations.bgImage.opacity, 0, 1)
+                if (animations.bgImage.opacity != 0) {
+                    ctx.globalAlpha = animations.bgImage.opacity
+                    ctx.drawImage(menuBgImg, -dw/2+menuBgX/scale, -dh/2+menuBgY/scale, dw, dh)
+                    ctx.globalAlpha = 1
+                }
+            }
 
         }
 
