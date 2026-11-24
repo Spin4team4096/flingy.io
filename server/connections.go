@@ -90,6 +90,7 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 // 3: Lobby Data: Sends data about the game
 // 4: One Username: When a player joins, send that username to all clients
 // 5: All usernames: When game state changes (0>1, 1>0, 1>2), send all usernames
+// 6: Adds however much money you want
 
 // -1: Join Request: Adds player to requested lobby
 // -2: Client Data: Client inputs go here
@@ -244,7 +245,12 @@ func encodePacket(packetType int, data any) []byte {
 		}
 
 		return w.done()
-
+	case 6:
+		w := newPacketWriter(2 + 1)
+		w.u8(byte(version))
+		w.u8(byte(packetType))
+		w.u8(uint8(data.(uint8)))
+		return w.done()
 	}
 	return nil
 }

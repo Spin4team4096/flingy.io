@@ -131,6 +131,7 @@ func main() {
 						c.send(1, packet)
 					}
 				}
+				lobby.BorderRadius = float64(lobby.Config.BorderRadius)
 			case 1:
 				lobby.Open = playerCount < lobby.Config.PlayerLimit
 				if playerCount <= 1 {
@@ -170,7 +171,7 @@ func main() {
 							angle := 2 * math.Pi * (float64(n) / float64(playersAlive))
 							tx := math.Cos(angle) * float64(lobby.BorderRadius) * 0.8
 							ty := math.Sin(angle) * float64(lobby.BorderRadius) * 0.8
-							k := 1 - math.Pow(0.95, dt)
+							k := 1 - math.Pow(0.93, dt)
 							lobby.Player[i].X += (tx - lobby.Player[i].X) * k
 							lobby.Player[i].Y += (ty - lobby.Player[i].Y) * k
 						}
@@ -194,6 +195,7 @@ func main() {
 					log.Printf("[%s] Somebody won, idk who", id)
 					// spawn game ended sound (distanceless)
 				}
+				lobby.BorderRadius = clamp(lobby.BorderRadius-(float64(lobby.Config.BorderRadius)-float64(lobby.Config.MinBorderRadius))/(float64(lobby.Config.MatchTime)*30)*dt, float64(lobby.Config.MinBorderRadius), float64(lobby.Config.BorderRadius))
 			case 3:
 				lobby.Open = false
 				if lobby.StateTick >= targetTPS*5 || playerCount == 0 {
@@ -221,6 +223,22 @@ func main() {
 						p.TimeLeftImmune -= dt
 						if p.TimeLeftImmune <= 0 {
 							p.Immune = false
+						}
+					}
+
+					if lobby.BorderRadius <= float64(lobby.Config.MinBorderRadius) {
+						p.HP -= (dt / 30) / (10 + p.FlailRadius/5)
+						if p.HP <= 0 {
+							p.HP = 0
+							p.Alive = false
+
+							playersAlive := 0
+							for i := range lobby.Player {
+								if lobby.Player[i].HP > 0 {
+									playersAlive++
+								}
+							}
+							p.Rank = playersAlive
 						}
 					}
 
@@ -306,10 +324,20 @@ func main() {
 								c.Alive = false
 								c.TimeUntilRespawn = 90
 								// spawn death sound
-								// send money packet to killer
+								if killer := lobby.Clients[uint8(i)]; killer != nil && lobby.Config.AddMoney {
+									killer.send(2, encodePacket(6, uint8(1)))
+								}
 								if c.HP <= 0 {
 									// broadcast elimination to killer
 									// spawn lose sound for losing player only
+									c.HP = 0
+									playersAlive := 0
+									for i := range lobby.Player {
+										if lobby.Player[i].HP > 0 {
+											playersAlive++
+										}
+									}
+									c.Rank = playersAlive
 								} else {
 									// broadcast kill to killer
 									c.X = randomFloat(-lobby.BorderRadius, lobby.BorderRadius)

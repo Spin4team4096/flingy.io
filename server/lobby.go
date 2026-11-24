@@ -10,16 +10,17 @@ import (
 
 // Structs
 type LobbyConfig struct {
-	ID            string  `json:"id"`
-	Name          string  `json:"name"`
-	PlayerLimit   int     `json:"playerLimit"`
-	BorderRadius  int     `json:"borderRadius"`
-	MatchTime     int     `json:"matchTime"`
-	CountdownTime int     `json:"countdownTime"`
-	BotSpinSpeed  int     `json:"botSpinSpeed"`
-	BotAccuracy   int     `json:"botAccuracy"`
-	BotPercentage float64 `json:"botPercentage"`
-	AddMoney      bool    `json:"addMoney"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	PlayerLimit     int     `json:"playerLimit"`
+	BorderRadius    int     `json:"borderRadius"`
+	MinBorderRadius int     `json:"minBorderRadius"`
+	MatchTime       int     `json:"matchTime"`
+	CountdownTime   int     `json:"countdownTime"`
+	BotSpinSpeed    int     `json:"botSpinSpeed"`
+	BotAccuracy     int     `json:"botAccuracy"`
+	BotPercentage   float64 `json:"botPercentage"`
+	AddMoney        bool    `json:"addMoney"`
 }
 type Player struct {
 	Active                   bool
@@ -223,8 +224,8 @@ func firebaseLoop() {
 			status      int
 			config      LobbyConfig
 		}
-		updates := make([]pub, 0, len(lobbies))
 		lobbiesMu.Lock()
+		updates := make([]pub, 0, len(lobbies))
 		for id, lobby := range lobbies {
 
 			playerCount := 0

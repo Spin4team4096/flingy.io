@@ -7,7 +7,11 @@
 
 ### UI
 - right click to open color dropdown
+- style the HUD leave button
 - tips are meant to be randomly shuffled every cycle like in old flingy.io
+
+### Debug
+- debug menu: draw the squares for the borderScale/mouseScale clamp ranges
 
 ### Misc
 - interpolation/predict for entity movement (the smoothing setting)

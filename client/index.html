@@ -106,6 +106,7 @@
                 pointer-events: none;
                 > :not(#menu-controls, #tips), #menu-controls > :not(#play-button) {opacity: 0;}
                 #play-button {opacity: 0;}
+                ~ #settings-panel, ~ #changelog-panel {bottom: calc(12px*var(--ui));}
             }
             > :not(#menu-controls, #tips), #menu-controls > :not(#play-button) {transition: opacity calc(0.5s*var(--transition, 1));}
         }
@@ -637,7 +638,7 @@
     <div id="hud">
         <div id="notifications"></div>
         <div id="leaderboard"></div>
-        <button id="leave">
+        <button id="leave-button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-leave"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
         </button>
     </div>
@@ -704,7 +705,7 @@
             hud: {
                 notifications: document.getElementById('notifications'),
                 leaderboard: document.getElementById('leaderboard'),
-                leave: document.getElementById('leave'),
+                leaveButton: document.getElementById('leave-button'),
             },
             settings: document.getElementById('settings-panel'),
             changelog: document.getElementById('changelog-panel'),
@@ -793,6 +794,30 @@
             keys[key] = true
             if(['Tab'].includes(e.key)) {
                 e.preventDefault()
+            }
+            if (e.key == 'Escape' && !e.repeat) toggleSettings()
+            if (e.key == 'Tab' && !e.repeat) toggleChangelog()
+            if (settingsPage != 0) {
+                if (e.key == '0' && !e.repeat) {
+                    settingsPage = 1
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, 0.9)
+                }
+                if (e.key == '1' && !e.repeat) {
+                    settingsPage = 2
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, randomFloat(0.9,1.1))
+                }
+                if (e.key == '2' && !e.repeat) {
+                    settingsPage = 3
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, randomFloat(0.9,1.1))
+                }
+                if (e.key == '3' && !e.repeat) {
+                    settingsPage = 4
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, randomFloat(0.9,1.1))
+                }
             }
         })
         addEventListener('keyup', e => {
@@ -968,6 +993,11 @@
             animations.colorButton.time = 0
             animations.colorButton.acceleration = randomFloat(3.5, 4.0)
             animations.colorButton.lastCrossing = 0
+        })
+        
+        ui.hud.leaveButton.addEventListener('click', () => {
+            playSound('negativeaction2')
+            ws.close()
         })
 
         addEventListener('pointerdown', () => audio.resume(), {once: true})
@@ -1235,7 +1265,7 @@
             ctx.restore()
         }
 
-        function drawText(x, y, size, fillColor, outlineColor, thickness = 0, text) {
+        function drawText(text, x, y, size, fillColor, outlineColor, thickness = 0) {
 
         }
 
@@ -1791,6 +1821,9 @@
                         lobby.player[slot].username = new TextDecoder().decode(new Uint8Array(data,i,length)) ;i += length
                     }
                 } break
+                case 6: {
+                    coins += packet.getUint8(i) ;i += 1
+                } break
                 default: console.warn(`idk what packet ${packetType} is`) ;break
             }
             
@@ -2099,7 +2132,7 @@
                 drawCircle(-cameraX, -cameraY, lobby.borderRadius+2, null, `#000000${toHex(0.10)}`, 2)
                 
                 // Entities - no: en titties :P
-                // yes i used the same joke from cobbled.io's code, cry about it     // Players <-- for ctrl+f
+                // yes i used the same joke from cobbled.io's and old.flingy.io's code, cry about it     // Players <-- for ctrl+f
                 for (let i = 0; i < lobby.config.playerLimit; i++) {
                     let p = lobby.player[i]
                     if (!p.active) continue
@@ -2113,6 +2146,36 @@
                         drawShape(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*0.64, 5, null, outlineColor, 2, -90)
                     }
                 }
+
+                // HUD
+
+                gap = 12*(fov/1080)*settings.uiScale
+
+                // Minimap
+                if (settings.showMinimap) {
+                    let size = 45*settings.uiScale
+                    let mx = screenSizeX/2-size-gap
+                    let my = screenSizeY/2-size-gap
+                    let k = size/lobby.borderRadius
+                    drawCircle(mx, my, size, `#828282${toHex(0.25)}`, `#c2c2c2${toHex(0.5)}`, 6*(fov/1080)*settings.uiScale)
+                    let arrowsDrawn = 0
+                    for (let i = 0; i < lobby.player.length && arrowsDrawn < 256; i++) {
+                        let p = lobby.player[i]
+                        if (i == playerSlot) continue
+                        if (!p.active) continue
+                        if (!p.alive) continue
+                        drawShape(mx+(p.x*k), my+(p.y*k), 2.5, 3, colorsToOutlineHex(playerColors[p.colorIndex]), null, 0, p.direction)
+                        arrowsDrawn++
+                    }
+                    if (lobby.player[playerSlot].alive) {
+                        let p = lobby.player[playerSlot]
+                        drawCircle(mx+(p.flailX*k), my+(p.flailY*k), clamp(p.flailRadius/10, 0.5, 16), colorsToHex(playerColors[p.colorIndex]))
+                        drawShape(mx+(p.x*k), my+(p.y*k), 2.5, 3, '#000000', null, 0, p.direction)
+                    }
+                }
+
+
+                
             }
             
             menuBgX += (-mouseX*0.03-menuBgX)*(1-Math.pow(0.64,dt))
