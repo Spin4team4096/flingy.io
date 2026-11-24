@@ -257,8 +257,8 @@ func main() {
 					// flail
 					if p.FlailConnected {
 						oldX, oldY := p.FlailX, p.FlailY
-						p.FlailX = p.X + cos*(20+p.Radius+p.FlailRadius)
-						p.FlailY = p.Y + sin*(20+p.Radius+p.FlailRadius)
+						p.FlailX = p.X + cos*(16+p.Radius+p.FlailRadius)
+						p.FlailY = p.Y + sin*(16+p.Radius+p.FlailRadius)
 						p.FlailSpeedX = (p.FlailX - oldX) / dt
 						p.FlailSpeedY = (p.FlailY - oldY) / dt
 					} else {

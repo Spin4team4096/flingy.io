@@ -2077,9 +2077,7 @@
                     let p = lobby.player[i]
                     if (!p.active) continue
                     if (!p.alive) continue
-                    //drawRect(p.x-cameraX, p.y-cameraY, 10, 10, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
-                    //drawRect(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*2, p.flailRadius*2, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
-                    drawLine(0, 0, [[p.x-cameraX, p.y-cameraY], [p.flailX-cameraX, p.flailY-cameraY]], null, colorsToOutlineHex(playerColors[p.colorIndex]), 2)
+                    if (p.flailConnected) drawLine(0, 0, [[p.x-cameraX, p.y-cameraY], [p.flailX-cameraX, p.flailY-cameraY]], null, colorsToOutlineHex(playerColors[p.colorIndex]), 2)
                     drawShape(p.x-cameraX, p.y-cameraY, 5, 5, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
                     drawCircle(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2)
                     if (i == playerSlot) {
