@@ -2,6 +2,9 @@
 - rendering
 - uhhhhhhhhhh everything
 
+### Rendering
+- drawRect() rounded corner support
+
 ### UI
 - right click to open color dropdown
 - tips are meant to be randomly shuffled every cycle like in old flingy.io

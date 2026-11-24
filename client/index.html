@@ -1112,32 +1112,135 @@
 
         // Drawing Functions
 
-        function drawRect(x, y, width, height, fillColor, outlineColor, thickness = 0, dir = 0, roundedCorners = [0,0,0,0]) {
+        function drawRect(x, y, width, height, fillColor, outlineColor, thickness = 0, dir = 0, roundedCorners = null) {
             ctx.save()
-            ctx.fillStyle = fillColor
-            ctx.strokeStyle = outlineColor
-            ctx.lineWidth = thickness
+
             ctx.translate(x, y)
             if (dir != 0) {ctx.rotate(degToRad(dir))}
-            ctx.fillRect(-width/2, -height/2, width, height)
-            if (thickness > 0) {ctx.strokeRect(-width/2+thickness/2, -height/2+thickness/2, width-thickness, height-thickness)}
+            
+            if (roundedCorners == null) {
+                if (fillColor) {
+                    ctx.fillStyle = fillColor
+                    
+                    ctx.fillRect(-width/2, -height/2, width, height)
+                }
+
+                if (outlineColor && thickness > 0) {
+                    ctx.strokeStyle = outlineColor
+                    
+                    ctx.lineWidth = thickness
+                    ctx.strokeRect(-width/2+thickness/2, -height/2+thickness/2, width-thickness, height-thickness)
+                }
+            } else {
+                // roundedCorners can be [10,10,10,10] or even wacky like [0,0,10,20]
+                console.warn(`you dumbo. you need to code rounded corners in if you wanna use em`)
+            }
+            
             ctx.restore()
         }
 
         function drawShape(x, y, radius, n, fillColor, outlineColor, thickness = 0, dir = 0) {
+            ctx.save()
 
+            ctx.translate(x, y)
+            if (dir != 0) {ctx.rotate(degToRad(dir))}
+
+            if (fillColor) {
+                ctx.fillStyle = fillColor
+
+                ctx.beginPath()
+                ctx.moveTo(radius, 0)
+                for (let p = 1; p < n; p++) {
+                    ctx.lineTo(Math.cos(degToRad(360*p/n))*radius, Math.sin(degToRad(360*p/n))*radius)
+                }
+                ctx.closePath()
+                ctx.fill()
+            }
+
+            if (outlineColor && thickness > 0) {
+                let t = Math.min(thickness, radius)
+                let r = radius-t/2
+
+                ctx.strokeStyle = outlineColor
+                ctx.lineWidth = t
+
+                ctx.beginPath()
+                ctx.moveTo(r, 0)
+                for (let p = 1; p < n; p++) {
+                    ctx.lineTo(Math.cos(degToRad(360*p/n))*(r), Math.sin(degToRad(360*p/n))*r)
+                }
+                ctx.closePath()
+                ctx.stroke()
+            }
+
+            ctx.restore()
         }
 
         function drawCircle(x, y, radius, fillColor, outlineColor, thickness = 0) {
+            ctx.save()
 
+            ctx.translate(x, y)
+
+            if (fillColor) {
+                ctx.fillStyle = fillColor
+
+                ctx.beginPath()
+                ctx.arc(0, 0, radius, 0, 2*Math.PI)
+                ctx.closePath()
+                ctx.fill()
+            }
+
+            if (outlineColor && thickness > 0) {
+                let t = Math.min(thickness, radius)
+                let r = radius-t/2
+
+                ctx.strokeStyle = outlineColor
+                ctx.lineWidth = t
+
+                ctx.beginPath()
+                ctx.arc(0, 0, r, 0, 2*Math.PI)
+                ctx.closePath()
+                ctx.stroke()
+            }
+
+            ctx.restore()
         }
 
         function drawLine(x, y, points, fillColor, outlineColor, thickness = 0, dir = 0, closed = false) {
+        // this one doesn't inset the line thickness bc impossible.
+            ctx.save()
 
+            ctx.translate(x, y)
+            if (dir != 0) {ctx.rotate(degToRad(dir))}
+
+            ctx.beginPath()
+            ctx.moveTo(points[0][0], points[0][1])
+            for (let n = 1; n < points.length; n++) {
+                ctx.lineTo(points[n][0], points[n][1])
+            }
+
+            if (fillColor) {
+                ctx.fillStyle = fillColor
+                ctx.fill()
+            }
+
+            if (outlineColor && thickness > 0) {
+                ctx.lineWidth = thickness
+                ctx.strokeStyle = outlineColor
+
+                if (closed) ctx.closePath()
+                ctx.stroke()
+            }
+
+            ctx.restore()
         }
 
         function drawText(x, y, size, fillColor, outlineColor, thickness = 0, text) {
 
+        }
+
+        function toHex(num) {
+            return Math.round(clamp(num, 0, 1)*255).toString(16).padStart(2, "0")
         }
 
         function colorsToHex(color) {
@@ -1710,6 +1813,7 @@
             showMinimap: true,
             resolutionScale: 1,
             imageScaling: 'auto',
+            smoothing: 'predict',
         }
         playerSlot = -1
         playerColor = 'red'
@@ -1942,13 +2046,45 @@
             // render shit
             ctx.clearRect(-canvas.width/scale/2, -canvas.height/scale/2, canvas.width/scale, canvas.height/scale)
 
+            screenSizeX = canvas.width/scale
+            screenSizeY = canvas.height/scale
+
             if (playerSlot >= 0) {
+                // Grid
+                ctx.fillStyle = '#f7f8ff'
+                ctx.fillRect(-screenSizeX/2, -screenSizeY/2, screenSizeX, screenSizeY)
+
+                ctx.strokeStyle = `#000000${toHex(0.03)}`
+                ctx.lineWidth = 1
+                ctx.beginPath()
+                for (let x = Math.floor((cameraX-screenSizeX/2)/10)*10; x <= cameraX+screenSizeX/2; x += 10) {
+                    ctx.moveTo(x-cameraX, -screenSizeY/2)
+                    ctx.lineTo(x-cameraX, screenSizeY/2)
+                }
+                for (let y = Math.floor((cameraY-screenSizeY/2)/10)*10; y <= cameraY+screenSizeY/2; y += 10) {
+                    ctx.moveTo(-screenSizeX/2, y-cameraY)
+                    ctx.lineTo(screenSizeX/2, y-cameraY)
+                }
+                ctx.stroke()
+
+                // Border
+
+
+                
+                // Entities - no: en titties :P
+                // yes i used the same joke from cobbled.io's code, cry about it     // Players <-- for ctrl+f
                 for (let i = 0; i < lobby.config.playerLimit; i++) {
                     let p = lobby.player[i]
                     if (!p.active) continue
                     if (!p.alive) continue
-                    drawRect(p.x-cameraX, p.y-cameraY, 10, 10, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
-                    drawRect(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*2, p.flailRadius*2, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+                    //drawRect(p.x-cameraX, p.y-cameraY, 10, 10, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+                    //drawRect(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*2, p.flailRadius*2, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+                    drawLine(0, 0, [[p.x-cameraX, p.y-cameraY], [p.flailX-cameraX, p.flailY-cameraY]], null, colorsToOutlineHex(playerColors[p.colorIndex]), 2)
+                    drawShape(p.x-cameraX, p.y-cameraY, 5, 5, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2, p.direction)
+                    drawCircle(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius, colorsToHex(playerColors[p.colorIndex]), colorsToOutlineHex(playerColors[p.colorIndex]), 2)
+                    if (i == playerSlot) {
+                        drawShape(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*0.64, 5, null, colorsToOutlineHex(playerColors[p.colorIndex]), 2, -90)
+                    }
                 }
             }
             

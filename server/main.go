@@ -78,7 +78,8 @@ func main() {
 	log.Println("Started server")
 
 	// Main tick loop
-	ticker := time.NewTicker(time.Second / 30)
+	targetTPS := 30
+	ticker := time.NewTicker(time.Second / time.Duration(targetTPS))
 	last := time.Now()
 	for range ticker.C {
 		now := time.Now()
@@ -128,7 +129,7 @@ func main() {
 					}
 
 					// reset lobby data too, idk how
-				} else if lobby.StateTick >= lobby.Config.CountdownTime*30 {
+				} else if lobby.StateTick >= lobby.Config.CountdownTime*targetTPS {
 					lobby.State = 2
 					lobby.StateTick = 0
 					// shrink players
@@ -149,9 +150,9 @@ func main() {
 							angle := 2 * math.Pi * (float64(n) / float64(playersAlive))
 							tx := math.Cos(angle) * float64(lobby.BorderRadius) * 0.8
 							ty := math.Sin(angle) * float64(lobby.BorderRadius) * 0.8
-
-							lobby.Player[i].X += (tx - lobby.Player[i].X) * 0.05
-							lobby.Player[i].Y += (ty - lobby.Player[i].Y) * 0.05
+							k := 1 - math.Pow(0.95, dt)
+							lobby.Player[i].X += (tx - lobby.Player[i].X) * k
+							lobby.Player[i].Y += (ty - lobby.Player[i].Y) * k
 						}
 					}
 				}
@@ -169,7 +170,7 @@ func main() {
 					// spawn game ended sound (distanceless)
 				}
 			case 3:
-				if lobby.StateTick >= 30*5 || playerCount == 0 {
+				if lobby.StateTick >= targetTPS*5 || playerCount == 0 {
 					lobby.State = 0
 					lobby.StateTick = 0
 					log.Printf("Match Ended")
