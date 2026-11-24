@@ -89,13 +89,14 @@ func main() {
 			dt = 1.5
 		}
 		lobbiesMu.Lock()
-		for _, lobby := range lobbies {
+		for id, lobby := range lobbies {
 
 			lobby.Tick++
 			lobby.StateTick++
 
 			playerCount := 0
 			playersAlive := 0
+			playersUnharmed := 0
 			for i := range lobby.Player {
 				if lobby.Player[i].Active {
 					playerCount++
@@ -103,14 +104,27 @@ func main() {
 				if lobby.Player[i].HP > 0 {
 					playersAlive++
 				}
+				if lobby.Player[i].HP >= 3 && lobby.Player[i].Active {
+					playersUnharmed++
+				}
 			}
 
 			switch lobby.State {
 			case 0:
+				if lobby.Closing {
+					for _, c := range lobby.Clients {
+						c.conn.CloseNow()
+					}
+
+					delete(lobbies, id)
+					go unregisterLobby(id)
+					continue
+				}
+				lobby.Open = true
 				if playerCount > 1 {
 					lobby.State = 1
 					lobby.StateTick = 0
-					log.Printf("Starting Match")
+					log.Printf("[%s] Preparing match...", id)
 
 					packet := encodePacket(5, lobby) // send all usernames
 					for _, c := range lobby.Clients {
@@ -118,10 +132,11 @@ func main() {
 					}
 				}
 			case 1:
+				lobby.Open = playerCount < lobby.Config.PlayerLimit
 				if playerCount <= 1 {
 					lobby.State = 0
 					lobby.StateTick = 0
-					log.Printf("Not enough players anymore")
+					log.Printf("[%s] Not enough players anymore", id)
 
 					packet := encodePacket(5, lobby)
 					for _, c := range lobby.Clients {
@@ -132,9 +147,14 @@ func main() {
 				} else if lobby.StateTick >= lobby.Config.CountdownTime*targetTPS {
 					lobby.State = 2
 					lobby.StateTick = 0
-					// shrink players
+					for i := range lobby.Config.PlayerLimit {
+						p := &lobby.Player[i]
+						p.FlailRadius = 2.5
+						p.Immune = true
+						p.TimeLeftImmune = 60
+					}
 					// broadcast game started
-					log.Printf("Match Started")
+					log.Printf("[%s] Match started!", id)
 
 					packet := encodePacket(5, lobby)
 					for _, c := range lobby.Clients {
@@ -157,23 +177,29 @@ func main() {
 					}
 				}
 			case 2:
+				if playerCount == playersUnharmed && playerCount < lobby.Config.PlayerLimit {
+					lobby.Open = true
+				} else {
+					lobby.Open = false
+				}
 				if playerCount == 0 {
 					lobby.State = 0
 					lobby.StateTick = 0
-					log.Printf("Everyone left, BOOO")
+					log.Printf("[%s] Everyone left early, BOOO", id)
 					// reset lobby data too, idk how
 				} else if playersAlive <= 1 {
 					lobby.State = 3
 					lobby.StateTick = 0
 					// broadcast winner
-					log.Printf("Somebody won, idk")
+					log.Printf("[%s] Somebody won, idk who", id)
 					// spawn game ended sound (distanceless)
 				}
 			case 3:
+				lobby.Open = false
 				if lobby.StateTick >= targetTPS*5 || playerCount == 0 {
 					lobby.State = 0
 					lobby.StateTick = 0
-					log.Printf("Match Ended")
+					log.Printf("[%s] Match ended", id)
 
 					for _, c := range lobby.Clients {
 						c.conn.CloseNow()
@@ -267,6 +293,47 @@ func main() {
 						p.FlailX += p.FlailSpeedX * dt
 						p.FlailY += p.FlailSpeedY * dt
 					}
+
+					// collision
+					for n := range lobby.Player {
+						c := &lobby.Player[n]
+						if (p.FlailX-c.X)*(p.FlailX-c.X)+(p.FlailY-c.Y)*(p.FlailY-c.Y) <= (p.FlailRadius+c.Radius)*(p.FlailRadius+c.Radius) && c.Alive {
+							if p == c {
+								p.FlailConnected = true
+								p.FlingUsed = true
+							} else if lobby.State == 2 && !p.Immune && !c.Immune {
+								c.HP -= 1
+								c.Alive = false
+								c.TimeUntilRespawn = 90
+								// spawn death sound
+								// send money packet to killer
+								if c.HP <= 0 {
+									// broadcast elimination to killer
+									// spawn lose sound for losing player only
+								} else {
+									// broadcast kill to killer
+									c.X = randomFloat(-lobby.BorderRadius, lobby.BorderRadius)
+									c.Y = randomFloat(-lobby.BorderRadius, lobby.BorderRadius)
+									c.SpeedX = 0
+									c.SpeedY = 0
+									c.FlailX = c.X
+									c.FlailY = c.Y
+								}
+							}
+						}
+					}
+				} else if p.HP > 0 {
+					p.TimeUntilRespawn -= dt
+					if p.TimeUntilRespawn <= 0 {
+						p.Alive = true
+						p.FlailRadius *= 0.64
+						p.FlailConnected = true
+						p.FlingUsed = true
+						p.Immune = true
+						p.TimeLeftImmune = 60
+					}
+				} else {
+					// out for good, can't do anything
 				}
 			}
 

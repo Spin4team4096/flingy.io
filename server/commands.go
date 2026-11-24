@@ -43,7 +43,7 @@ func startConsole() {
 						}
 					}
 				}
-			case "end":
+			case "close":
 				if len(fields) > 1 {
 					if fields[1] == "all" {
 						lobbiesMu.Lock()
@@ -53,11 +53,11 @@ func startConsole() {
 						}
 						lobbiesMu.Unlock()
 						for _, id := range ids {
-							endLobby(id)
+							closeLobby(id)
 						}
 					} else {
 						for i := range len(fields) - 1 {
-							endLobby(fields[i+1])
+							closeLobby(fields[i+1])
 						}
 					}
 				}

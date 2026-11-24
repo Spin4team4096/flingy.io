@@ -46,17 +46,19 @@ type Player struct {
 	TimeUntilRespawn float64
 }
 type Lobby struct {
-	Config          LobbyConfig
-	Tick            int
-	Running         bool
-	Closing         bool
-	State           int // 0 = waiting, 1 = countdown, 2 = playing, 3 = ending
-	StateTick       int
-	PublishedStatus int // 0 = open, 1 = busy
-	LastUpdate      time.Time
-	BorderRadius    float64
-	Player          []Player
-	Clients         map[uint8]*clientData
+	Config               LobbyConfig
+	Tick                 int
+	Running              bool
+	Closing              bool
+	State                int // 0 = waiting, 1 = countdown, 2 = playing, 3 = ending
+	StateTick            int
+	Open                 bool
+	PublishedStatus      int // 0 = open, 1 = busy
+	PublishedPlayerCount int
+	LastUpdate           time.Time
+	BorderRadius         float64
+	Player               []Player
+	Clients              map[uint8]*clientData
 }
 
 type ServerEntry struct {
@@ -96,7 +98,7 @@ func createLobby(config LobbyConfig) {
 	lobbiesMu.Unlock()
 }
 
-func endLobby(id string) {
+func closeLobby(id string) {
 	lobbiesMu.Lock()
 	if lobbies[id] == nil {
 		lobbiesMu.Unlock()
@@ -112,6 +114,9 @@ func killLobby(id string) {
 	if lobbies[id] == nil {
 		lobbiesMu.Unlock()
 		return
+	}
+	for _, c := range lobbies[id].Clients {
+		c.conn.CloseNow()
 	}
 	delete(lobbies, id)
 	lobbiesMu.Unlock()
@@ -154,6 +159,11 @@ func unregisterAll() {
 	if err := serversRef.Delete(ctx); err != nil {
 		log.Println("Error resetting firebase:", err)
 	}
+	lobbiesMu.Lock()
+	for _, l := range lobbies {
+		l.LastUpdate = time.Time{}
+	}
+	lobbiesMu.Unlock()
 }
 
 type statusEntry struct {
@@ -180,8 +190,8 @@ func spawnPlayer(l *Lobby, slot int) {
 	p.Active = true
 	p.Alive = true
 	p.HP = 3
-	p.X = randomFloat(float64(-l.BorderRadius), float64(l.BorderRadius))
-	p.Y = randomFloat(float64(-l.BorderRadius), float64(l.BorderRadius))
+	p.X = randomFloat(-l.BorderRadius, l.BorderRadius)
+	p.Y = randomFloat(-l.BorderRadius, l.BorderRadius)
 	p.SpeedX = 0
 	p.SpeedY = 0
 	p.Radius = 5
@@ -197,8 +207,57 @@ func spawnPlayer(l *Lobby, slot int) {
 	p.WorldMouseY = 0
 	p.Rank = 0
 	p.Immune = true
+	p.TimeLeftImmune = 60
 }
 
 func despawnPlayer(l *Lobby, slot int) {
 	l.Player[slot] = Player{}
+}
+
+func firebaseLoop() {
+	ticker := time.NewTicker(time.Second)
+	for range ticker.C {
+		type pub struct {
+			id          string
+			playerCount int
+			status      int
+			config      LobbyConfig
+		}
+		updates := make([]pub, 0, len(lobbies))
+		lobbiesMu.Lock()
+		for id, lobby := range lobbies {
+
+			playerCount := 0
+			for i := range lobby.Player {
+				if lobby.Player[i].Active {
+					playerCount++
+				}
+			}
+
+			status := 0
+			if lobby.Open {
+				status = 0
+			} else {
+				status = 1
+			}
+
+			if status != lobby.PublishedStatus || playerCount != lobby.PublishedPlayerCount || time.Since(lobby.LastUpdate) >= 2*time.Minute {
+				lobby.PublishedStatus = status
+				lobby.PublishedPlayerCount = playerCount
+				lobby.LastUpdate = time.Now()
+				updates = append(updates, pub{id, playerCount, status, lobby.Config})
+			}
+		}
+		lobbiesMu.Unlock()
+
+		for _, u := range updates {
+			client.NewRef("flingy2/lobbies/"+u.id).Update(ctx, map[string]any{
+				"url":         os.Getenv("WS_URL"),
+				"status":      u.status,
+				"playerCount": u.playerCount,
+				"lastSeen":    time.Now().UnixMilli(),
+				"config":      u.config,
+			})
+		}
+	}
 }

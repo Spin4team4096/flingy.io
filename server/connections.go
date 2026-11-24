@@ -36,22 +36,27 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 	conn.SetReadLimit(1024)
 
 	ctx := context.Background()
+	joinCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	readCtx := joinCtx
+	awaitingJoin := true
 
 	c := &clientData{
 		conn: conn,
 		ctx:  ctx,
 		slot: -1,
 		queue: queue{
-			control: make(chan []byte, 8),
-			event:   make(chan []byte, 64),
-			state:   make(chan []byte, 1),
+			disconnect: make(chan []byte, 1),
+			control:    make(chan []byte, 8),
+			event:      make(chan []byte, 64),
+			state:      make(chan []byte, 1),
 		},
 		done: make(chan struct{}),
 	}
 	go c.sendLoop()
 	defer close(c.done)
 	for {
-		_, data, err := conn.Read(ctx) // the _ is msgType, i assume we don't care bout that
+		_, data, err := conn.Read(readCtx) // the _ is msgType, i assume we don't care bout that
 		if err != nil {
 			if c.slot >= 0 {
 				lobbiesMu.Lock()
@@ -66,6 +71,11 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 		if err := decodePacket(c, data); err != nil {
 			log.Println("decode error:", err)
 			continue
+		}
+		if c.slot >= 0 && awaitingJoin {
+			awaitingJoin = false
+			cancel()
+			readCtx = ctx
 		}
 	}
 }
@@ -261,8 +271,8 @@ func decodePacket(c *clientData, data []byte) (err error) {
 			}
 			username = string(runes)
 
-			if c.slot >= 0 {
-				c.send(1, encodePacket(2, uint8(3)))
+			if c.slot >= 0 { // i don't think this can ever happen, but ig i'll keep it
+				c.send(0, encodePacket(2, uint8(3)))
 				return nil
 			}
 
@@ -271,29 +281,35 @@ func decodePacket(c *clientData, data []byte) (err error) {
 			slot := -1
 			playerCount := 0
 			if lobby != nil {
-				for i := range lobby.Player {
-					if lobby.Player[i].Active {
-						playerCount++
-						continue
+				if lobby.Open {
+					for i := range lobby.Player {
+						if lobby.Player[i].Active {
+							playerCount++
+							continue
+						}
+						if slot == -1 {
+							spawnPlayer(lobby, i)
+							lobby.Player[i].Username = username
+							lobby.Player[i].ColorIndex = 0
+							slot = i
+							lobby.Clients[uint8(slot)] = c
+							playerCount++
+						}
 					}
-					if slot == -1 {
-						spawnPlayer(lobby, i)
-						lobby.Player[i].Username = username
-						lobby.Player[i].ColorIndex = 0
-						slot = i
-						lobby.Clients[uint8(slot)] = c
-						playerCount++
-					}
+				} else {
+					lobbiesMu.Unlock()
+					c.send(0, encodePacket(2, uint8(4)))
+					return nil
 				}
 			} else {
 				lobbiesMu.Unlock()
-				c.send(1, encodePacket(2, uint8(1)))
+				c.send(0, encodePacket(2, uint8(1)))
 				return nil
 			}
 
 			if slot < 0 {
 				lobbiesMu.Unlock()
-				c.send(1, encodePacket(2, uint8(2)))
+				c.send(0, encodePacket(2, uint8(2)))
 				return nil
 			}
 
@@ -325,6 +341,12 @@ func decodePacket(c *clientData, data []byte) (err error) {
 			}
 
 			lobbiesMu.Lock()
+			if c.slot < 0 {
+				return fmt.Errorf("packet -2 invalid; not joined yet")
+			}
+			if lobbies[c.lobbyID] == nil {
+				return fmt.Errorf("packet -2 invalid; lobby doesn't exist")
+			}
 			lobby := lobbies[c.lobbyID]
 			slot := c.slot
 
@@ -345,6 +367,12 @@ func decodePacket(c *clientData, data []byte) (err error) {
 
 func (c *clientData) send(priority int, pkt []byte) {
 	switch priority {
+	case 0:
+		select {
+		case c.queue.disconnect <- pkt:
+		default:
+			log.Println("disconnect queue fail")
+		}
 	case 1:
 		select {
 		case c.queue.control <- pkt:
@@ -393,6 +421,16 @@ func (c *clientData) write(pkt []byte) bool {
 func (c *clientData) sendLoop() {
 	for {
 		select {
+		case pkt := <-c.queue.disconnect:
+			if !c.write(pkt) {
+				return
+			} else {
+				c.conn.CloseNow()
+				return
+			}
+		default:
+		}
+		select {
 		case pkt := <-c.queue.control:
 			if !c.write(pkt) {
 				return
@@ -413,7 +451,15 @@ func (c *clientData) sendLoop() {
 			}
 		default:
 		}
+
 		select {
+		case pkt := <-c.queue.disconnect:
+			if !c.write(pkt) {
+				return
+			} else {
+				c.conn.CloseNow()
+				return
+			}
 		case pkt := <-c.queue.control:
 			if !c.write(pkt) {
 				return
@@ -433,61 +479,6 @@ func (c *clientData) sendLoop() {
 	}
 }
 
-func firebaseLoop() {
-	ticker := time.NewTicker(time.Second)
-	for range ticker.C {
-		type pub struct {
-			id          string
-			playerCount int
-			status      int
-		}
-		updates := make([]pub, 0, len(lobbies))
-		lobbiesMu.Lock()
-		for id, lobby := range lobbies {
-			playerCount := 0
-			playersAlive := 0
-			for i := range lobby.Player {
-				if lobby.Player[i].Active {
-					playerCount++
-				}
-				if lobby.Player[i].HP > 0 {
-					playersAlive++
-				}
-			}
-
-			status := 0
-			switch lobby.State {
-			case 0:
-				status = 0
-			case 1:
-				status = 0
-			case 2:
-				if playerCount == playersAlive {
-					status = 0
-				} else {
-					status = 1
-				}
-			case 3:
-				status = 1
-			}
-			if status != lobby.PublishedStatus || time.Since(lobby.LastUpdate) >= 2*time.Minute {
-				lobby.PublishedStatus = status
-				lobby.LastUpdate = time.Now()
-				updates = append(updates, pub{id, playerCount, status})
-			}
-		}
-		lobbiesMu.Unlock()
-
-		for _, u := range updates {
-			client.NewRef("flingy2/lobbies/"+u.id).Update(ctx, map[string]any{
-				"playerCount": u.playerCount,
-				"status":      u.status,
-				"lastSeen":    time.Now().UnixMilli(),
-			})
-		}
-	}
-}
-
 // Structs
 
 type clientData struct {
@@ -500,9 +491,10 @@ type clientData struct {
 }
 
 type queue struct {
-	control chan []byte
-	event   chan []byte
-	state   chan []byte
+	disconnect chan []byte
+	control    chan []byte
+	event      chan []byte
+	state      chan []byte
 }
 
 type notifParams struct {

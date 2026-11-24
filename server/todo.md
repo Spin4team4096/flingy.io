@@ -9,6 +9,7 @@
 - send statetick so the client can calc this for himself
 
 ### Commands
+- range support: `unregister 0001-0004` and `kill 0001-0004`, same as the single/all versions
 - `status` that lists the servers AND their status (lagging/joinable/full), or `status <serverID>` for only that server's status
 - `stats` that measures and gives avg tps and mspt etc, and `stats <serverID>` for that
 - give command finish feedback on those currently silent commands, like `unregister all` would log `unregistered 7 lobbies` for example.
