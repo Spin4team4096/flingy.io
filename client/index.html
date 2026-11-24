@@ -1157,8 +1157,8 @@
 
                 if (outlineColor && thickness > 0) {
                     ctx.strokeStyle = outlineColor
-                    
                     ctx.lineWidth = thickness
+
                     ctx.strokeRect(-width/2+thickness/2, -height/2+thickness/2, width-thickness, height-thickness)
                 }
             } else {
@@ -1265,8 +1265,36 @@
             ctx.restore()
         }
 
-        function drawText(text, x, y, size, fillColor, outlineColor, thickness = 0) {
+        function drawText(text, x, y, size, fillColor, outlineColor, thickness = 0, dir = 0, stacked = false) {
+            ctx.save() // if stacked = true, anchor line 1, push the rest downward. otherwise, centre the center as centre
 
+            ctx.translate(x, y)
+            if (dir != 0) {ctx.rotate(degToRad(dir))}
+
+            let bold = false
+            if (text.startsWith('**') && text.endsWith('**') && text.length > 4) {
+                bold = true
+                text = text.slice(2,-2)
+            }
+
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.font = `${bold ? 'bold ' : ''}${size}px Ubuntu`
+
+            if (outlineColor && thickness > 0) {
+                ctx.strokeStyle = outlineColor
+                ctx.lineWidth = thickness
+
+                ctx.strokeText(text, 0, 0)
+            }
+
+            if (fillColor) {
+                ctx.fillStyle = fillColor
+                
+                ctx.fillText(text, 0, 0)
+            }
+
+            ctx.restore()
         }
 
         function toHex(num) {
@@ -1856,6 +1884,7 @@
             "*SPIN SPIN SPIN SPIN SPIN SPIN SPIN SPIN*",
             "I am *super* proud of this UI :D",
             "This game was **NOT** vibe-coded.",
+            "You can press esc/tab to open the left sidebar panels",
         ]
         settings = {
             uiScale: 1,
@@ -2145,6 +2174,9 @@
                     if (i == playerSlot) {
                         drawShape(p.flailX-cameraX, p.flailY-cameraY, p.flailRadius*0.64, 5, null, outlineColor, 2, -90)
                     }
+                    drawText(`${Math.round(p.flailRadius*2)}`, p.flailX-cameraX, p.flailY-cameraY-(p.flailRadius+5), 10, fillColor, outlineColor, 1)
+                    drawText(`${p.hp} Lives`, p.x-cameraX, p.y-cameraY-18, 8, colorsToHex('red'), colorsToOutlineHex('red'), 1)
+                    drawText(p.username, p.x-cameraX, p.y-cameraY-10, 8, '#000000', '#ffffff', 1)
                 }
 
                 // HUD

@@ -243,14 +243,22 @@ func main() {
 					}
 
 					// direction
-					diff := math.Remainder(directionTo(p.WorldMouseX, p.WorldMouseY, p.X, p.Y)-p.Direction, 360)
 
 					if p.FlailConnected {
-						p.AngularVelocity = p.AngularVelocity*math.Pow(0.9, dt) + (diff*0.03/(1+math.Sqrt(p.FlailRadius*2)/10))*dt
+						diff := math.Remainder(directionTo(p.WorldMouseX, p.WorldMouseY, p.X, p.Y)-p.Direction, 360)
+
+						// change 2.0 to make it snappier
+						gain := 0.03 * (1 - math.Pow(0.9, 2.0)) / (1 - 0.9)
+						damping := math.Pow(0.9, 2.0*dt)
+						brake := 1 + math.Sqrt(p.FlailRadius*2)/10
+						accel := diff * gain / brake
+
+						p.AngularVelocity = p.AngularVelocity*damping + accel*dt
+						p.Direction += p.AngularVelocity * dt
 					} else {
-						p.AngularVelocity = p.AngularVelocity*math.Pow(0.9, dt) + (diff*0.05)*dt
+						p.AngularVelocity = 0
+						p.Direction = directionTo(p.WorldMouseX, p.WorldMouseY, p.X, p.Y)
 					}
-					p.Direction += p.AngularVelocity * dt
 
 					sin, cos := math.Sincos(degToRad(p.Direction))
 
