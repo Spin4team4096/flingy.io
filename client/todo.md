@@ -15,6 +15,7 @@
 - debug menu: draw the squares for the borderScale/mouseScale clamp ranges
 
 ### Misc
+- live ping: either nothing or a real ping/pong packet (join-handshake RTT isn't live)
 - expire `invalidServers` marks after ~30-60s using timestamps instead of blacklisting for the whole session
 - interpolation/predict for entity movement (the smoothing setting)
 - reuse one global `TextDecoder` instead of creating one per username in packets 4/5

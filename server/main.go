@@ -299,7 +299,7 @@ func main() {
 					sin, cos := math.Sincos(degToRad(p.Direction))
 
 					// fling
-					if p.FlailConnected && p.LeftMouseDown && !p.FlingUsed && (lobby.State == 2 || lobby.State == 0) {
+					if p.FlailConnected && p.LeftMouseDown && !p.FlingUsed && (lobby.State != 1) {
 						p.FlailConnected = false
 						p.SpeedX += -cos * (7.5 + p.FlailRadius*0.15)
 						p.SpeedY += -sin * (7.5 + p.FlailRadius*0.15)

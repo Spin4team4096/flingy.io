@@ -6,9 +6,6 @@
   - in fact, there's no checks at all. a player can just join midgame rn.
 
 ### Team Mode
-- FFA currently has no friendly fire either: collision needs `p.Team == -1 || p.Team != c.Team`
-- assign teams balanced by active player count, not `slot % 2`
-- win condition: last team standing instead of `playersAlive <= 1`
 - rank/placement per team instead of per player
 - send Team to the client (packet 3 flags bits 3-7 are all colourIndex, so needs an encoding decision)
 
@@ -21,6 +18,8 @@
 
 ### Commands
 - range support: `unregister 0001-0004` and `kill 0001-0004`, same as the single/all versions
+  - also would be good to specify `ffa` or `tdm` icl. `kill ffa_0001-0004` is nice. 
+  - maybe even super-shorthand support: `kill ffa_1-4` is awesome. so is `kill f1-4` that is beautiful. maybe that's the meta.
 - `status` that lists the servers AND their status (lagging/joinable/full), or `status <serverID>` for only that server's status
 - `stats` that measures and gives avg tps and mspt etc, and `stats <serverID>` for that
 - give command finish feedback on those currently silent commands, like `unregister all` would log `unregistered 7 lobbies` for example.
@@ -32,6 +31,10 @@
   - launches a new terminal, runs `go run ./server`
   - on the existing server terminal, `close all`, wait for that to happen, then kill that terminal.
 - also, automatically starting the cloudflare tunnel upon system startup would be good.
+
+### Misc
+- the player can spin an extra revolution sometimes, tho sometimes the player just stacked a lot of spins but they changed their mine cuz they're not spinning anymore. in that case, the spin accumullator should -360 early. trigger should probably be: the mouse angle goes the other way (not: the mouse stops moving. cuz client can lag.). 
+  - what i mean is: if the accumulated spin is positive, and there's a lot of accumulated spin, maybe if > `spinSpeed` amount is in it, but the mouse angle diff between now and last tick is negative, then the direction changed: -360 the accumulator to canel it early.
 
 ### Random Ideas
 - Have a server health tracking system, like a command `health` and a struct that contains health info;

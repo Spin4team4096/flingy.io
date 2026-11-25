@@ -5,6 +5,7 @@
         {"type": "button", "label": "Keybind Settings", "page": 4, "color": "orange", "height": "18%"}
     ]},
     "2": {"title": "GENERAL SETTINGS", "children": [
+        {"type": "text", "label": "**Got a question? Ask me, @spin4096 in the [Discord](https://discord.gg/z2uZvEXfPx) **", "size": 15, "opacity": 1},
         {"type": "section", "label": "Interface", "open": true, "color": "red", "children": [
             {"type": "slider", "label": "UI Scale", "setting": "uiScale", "min": 0.5, "max": 1.5, "step": 0.05},
             {"type": "slider", "label": "Animation Time", "setting": "animationTime", "min": 0, "max": 2, "step": 0.05},
@@ -20,13 +21,12 @@
             {"type": "choice", "label": "Image Scaling", "setting": "imageScaling", "options": [{"label": "Pixelated", "value": "pixelated"}, {"label": "Smooth", "value": "auto"}]},
             {"type": "choice", "label": "Smooth", "setting": "smoothing", "options": [{"label": "Off", "value": "off"}, {"label": "Interpolate", "value": "interpolate"}, {"label": "Predict", "value": "predict"}]},
             {"type": "text", "label": "Smooths player movement between server updates", "size": 15, "opacity": 0.5},
-            {"type": "text", "label": "**NOTE: *Interpolation* has not been added yet; if selected, the game changes it to OFF**", "size": 15, "opacity": 0.5},
-            {"type": "text", "label": "**NOTE: Client-Side *Predict*ion has not been added yet; if selected, the game changes it to OFF**", "size": 15, "opacity": 0.5}
+            {"type": "text", "label": "**NOTE: Client-Side *Predict*ion has not been added yet; if selected, the game actually uses Interpolation**", "size": 15, "opacity": 0.5}
         ]},
         {"type": "section", "label": "Debug", "open": true, "color": "yellow", "children": [
             {"type": "choice", "label": "Show Performance (F)", "setting": "showPerformanceActivation", "options": [{"label": "Hold", "value": "hold"}, {"label": "Toggle", "value": "toggle"}]},
             {"type": "choice", "label": "Show Debug (I)", "setting": "showDebugActivation", "options": [{"label": "Hold", "value": "hold"}, {"label": "Toggle", "value": "toggle"}]},
-            {"type": "choice", "label": "Render Debug (R)", "setting": "renderDebugActivation", "options": [{"label": "Hold", "value": "hold"}, {"label": "Toggle", "value": "toggle"}]}
+            {"type": "choice", "label": "Render Debug ()", "setting": "renderDebugActivation", "options": [{"label": "Hold", "value": "hold"}, {"label": "Toggle", "value": "toggle"}]}
         ]},
         {"type": "section", "label": "Sounds", "open": true, "color": "lime", "children": [
             {"type": "slider", "label": "Volume", "setting": "volume", "min": 0, "max": 1, "step": 0.05}
