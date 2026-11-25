@@ -700,7 +700,7 @@
         uiScale = 1
 
         const palette = [
-            'red','coral','orange','yellow','lime','green','blue','purple','pink','tan', 'navy','brown','maroon','burgundy','magenta','cyan','leaf','black','gray','white'
+            'red','coral','orange','yellow','lime','green','blue','purple','magenta','tan', 'navy','brown','maroon','burgundy','pink','cyan','mint','black','gray','white'
         ]
         for (const color of palette) {
             document.documentElement.style.setProperty(`--${color}`, colorsToHex(color))
@@ -1347,15 +1347,15 @@
                 case 'green': return '#71bf4d'
                 case 'blue': return '#6696ff'
                 case 'purple': return '#9966ff'
-                case 'pink': return '#fc66ff'
+                case 'magenta': return '#fc66ff'
                 case 'tan': return '#ffccb3'
                 case 'navy': return '#4d71bf'
                 case 'brown': return '#bf734d'
                 case 'maroon': return '#bf4d4d'
                 case 'burgundy': return '#bf4d76'
-                case 'magenta': return '#ff66af'
+                case 'pink': return '#ff66af'
                 case 'cyan': return '#5ce6e6'
-                case 'leaf': return '#5ce693'
+                case 'mint': return '#5ce693'
                 case 'black': return '#333333'
                 case 'gray': return '#bfbfbf'
                 case 'white': return '#f2f2f2'
@@ -1383,15 +1383,15 @@
                 case 'green': return '#4b8033'
                 case 'blue': return '#4d71bf'
                 case 'purple': return '#734dbf'
-                case 'pink': return '#bd4dbf'
+                case 'magenta': return '#bd4dbf'
                 case 'tan': return '#bf9986'
                 case 'navy': return '#334b80'
                 case 'brown': return '#804d33'
                 case 'maroon': return '#803333'
                 case 'burgundy': return '#80334f'
-                case 'magenta': return '#bf4d84'
+                case 'pink': return '#bf4d84'
                 case 'cyan': return '#4dbfbf'
-                case 'leaf': return '#4dbf7a'
+                case 'mint': return '#4dbf7a'
                 case 'black': return '#262626'
                 case 'gray': return '#999999'
                 case 'white': return '#bfbfbf'
@@ -1938,7 +1938,7 @@
         }
         playerSlot = -1
         playerColor = 'red'
-        playerColors = ['red', 'coral', 'orange', 'yellow', 'lime', 'green', 'leaf', 'cyan', 'blue', 'navy', 'purple', 'magenta', 'pink', 'burgundy', 'maroon', 'brown', 'tan', 'white', 'gray', 'black']
+        playerColors = ['red', 'coral', 'orange', 'yellow', 'lime', 'green', 'mint', 'cyan', 'blue', 'navy', 'purple', 'pink', 'magenta', 'burgundy', 'maroon', 'brown', 'tan', 'white', 'gray', 'black']
         unlockedColors = []
         remainingColors = []
         colorPrice = Infinity
@@ -2289,6 +2289,7 @@ FPS: #
 MSPT: #
 Ping: #ms
 Server TPS: ${lobby.tps}
+Resolution: ${canvas.width}x${canvas.height} canvas (${settings.resolutionScale}x of ${Math.round(innerWidth*devicePixelRatio)}x${Math.round(innerHeight*devicePixelRatio)})
 
 === LOBBY INFO === 
 Map Radius: ${lobby.borderRadius} units
@@ -2346,6 +2347,7 @@ Ping: #ms
                 if (username) {ui.menu.menuControls.username.value = username}
 
                 try {unlockedColors = JSON.parse(getStoredKey('flingy_v2_unlockedColors'))} catch(e) {unlockedColors = null}
+                unlockedColors = unlockedColors.filter(c => playerColors.includes(c))
                 if (!unlockedColors || !unlockedColors.length) unlockedColors = ['red', 'orange', 'lime', 'blue']
                 unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
                 
