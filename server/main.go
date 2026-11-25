@@ -61,13 +61,13 @@ func main() {
 	for i := range configs {
 		n := 1
 		for {
-			candidate := fmt.Sprintf("%s%04d", configs[i].ID, n)
+			candidate := fmt.Sprintf("%s_%04d", configs[i].ID, n)
 			if _, ok := servers[candidate]; !ok {
 				break
 			}
 			n++
 		}
-		configs[i].ID = fmt.Sprintf("%s%04d", configs[i].ID, n)
+		configs[i].ID = fmt.Sprintf("%s_%04d", configs[i].ID, n)
 		servers[configs[i].ID] = ServerEntry{}
 		createLobby(configs[i])
 	}
@@ -97,14 +97,34 @@ func main() {
 			playerCount := 0
 			playersAlive := 0
 			playersUnharmed := 0
+			teamCount := 0
+			teamList := map[int]int{}
+			teamColors := [4]int{0, 8, 2, 4}
 			for i := range lobby.Player {
-				if lobby.Player[i].Active {
+				p := &lobby.Player[i]
+				if p.Active {
+					if lobby.Config.Gamemode == "TDM" {
+						if lobby.State <= 1 {
+							p.Team = playerCount % lobby.Config.TeamCount
+						}
+						p.ColorIndex = teamColors[p.Team]
+					}
+
 					playerCount++
 				}
-				if lobby.Player[i].HP > 0 {
+				if p.HP > 0 {
+					group := p.Team
+					if group == -1 {
+						group = i
+					}
+					if _, ok := teamList[group]; !ok {
+						teamCount++
+						teamList[group] = teamCount
+					}
+
 					playersAlive++
 				}
-				if lobby.Player[i].HP >= 3 && lobby.Player[i].Active {
+				if p.HP >= 3 && p.Active {
 					playersUnharmed++
 				}
 			}
@@ -121,7 +141,7 @@ func main() {
 					continue
 				}
 				lobby.Open = true
-				if playerCount > 1 {
+				if playerCount >= lobby.Config.MinPlayers {
 					lobby.State = 1
 					lobby.StateTick = 0
 					log.Printf("[%s] Preparing match...", id)
@@ -134,7 +154,7 @@ func main() {
 				lobby.BorderRadius = float64(lobby.Config.BorderRadius)
 			case 1:
 				lobby.Open = playerCount < lobby.Config.PlayerLimit
-				if playerCount <= 1 {
+				if playerCount < lobby.Config.MinPlayers {
 					lobby.State = 0
 					lobby.StateTick = 0
 					log.Printf("[%s] Not enough players anymore", id)
@@ -164,21 +184,25 @@ func main() {
 
 					// spawn game started sound (distanceless)
 				} else if playersAlive > 0 {
-					n := 0
+					// countdown pull
 					for i := range lobby.Config.PlayerLimit {
+						p := &lobby.Player[i]
 						if lobby.Player[i].HP > 0 {
-							n++
-							angle := 2 * math.Pi * (float64(n) / float64(playersAlive))
+							group := p.Team
+							if group == -1 {
+								group = i
+							}
+							angle := 2 * math.Pi * float64(teamList[group]) / float64(teamCount)
 							tx := math.Cos(angle) * float64(lobby.BorderRadius) * 0.8
 							ty := math.Sin(angle) * float64(lobby.BorderRadius) * 0.8
 							k := 1 - math.Pow(0.93, dt)
-							lobby.Player[i].X += (tx - lobby.Player[i].X) * k
-							lobby.Player[i].Y += (ty - lobby.Player[i].Y) * k
+							p.X += (tx - p.X) * k
+							p.Y += (ty - p.Y) * k
 						}
 					}
 				}
 			case 2:
-				if playerCount == playersUnharmed && playerCount < lobby.Config.PlayerLimit {
+				if playerCount == playersUnharmed && playerCount < lobby.Config.PlayerLimit && lobby.Config.Gamemode == "FFA" {
 					lobby.Open = true
 				} else {
 					lobby.Open = false
@@ -188,7 +212,7 @@ func main() {
 					lobby.StateTick = 0
 					log.Printf("[%s] Everyone left early, BOOO", id)
 					// reset lobby data too, idk how
-				} else if playersAlive <= 1 {
+				} else if teamCount <= 1 {
 					lobby.State = 3
 					lobby.StateTick = 0
 					// broadcast winner
@@ -250,7 +274,7 @@ func main() {
 
 					if p.FlailConnected {
 						diff := p.SpinTarget - p.Direction
-						maxSpeed := float64(180)
+						maxSpeed := float64(128)
 						if diff > 360+maxSpeed {
 							p.SpinTarget -= 360 * math.Ceil((diff-(360+maxSpeed))/360)
 						} else if diff < -360-maxSpeed {
@@ -275,7 +299,7 @@ func main() {
 					sin, cos := math.Sincos(degToRad(p.Direction))
 
 					// fling
-					if p.FlailConnected && p.LeftMouseDown && !p.FlingUsed && lobby.State == 2 {
+					if p.FlailConnected && p.LeftMouseDown && !p.FlingUsed && (lobby.State == 2 || lobby.State == 0) {
 						p.FlailConnected = false
 						p.SpeedX += -cos * (7.5 + p.FlailRadius*0.15)
 						p.SpeedY += -sin * (7.5 + p.FlailRadius*0.15)
@@ -287,7 +311,7 @@ func main() {
 					}
 
 					if p.FlailConnected {
-						p.FlailRadius = clamp(p.FlailRadius+((math.Abs(p.AngularVelocity)/150-0.05)*dt), 2.5, 50)
+						p.FlailRadius = clamp(p.FlailRadius+((math.Abs(p.AngularVelocity)/100-0.05)*dt), 2.5, 50)
 					} else {
 						if p.FlailRadius > 2.5 {
 							p.FlailRadius = clamp(p.FlailRadius-(0.15*dt), 0, 50)
@@ -339,7 +363,7 @@ func main() {
 							if p == c {
 								p.FlailConnected = true
 								p.FlingUsed = true
-							} else if lobby.State == 2 && !p.Immune && !c.Immune {
+							} else if lobby.State == 2 && !p.Immune && !c.Immune && (p.Team != c.Team || p.Team == -1 || c.Team == -1) {
 								c.HP -= 1
 								c.Alive = false
 								c.TimeUntilRespawn = 90

@@ -23,7 +23,12 @@
             {"type": "text", "label": "**NOTE: *Interpolation* has not been added yet; if selected, the game changes it to OFF**", "size": 15, "opacity": 0.5},
             {"type": "text", "label": "**NOTE: Client-Side *Predict*ion has not been added yet; if selected, the game changes it to OFF**", "size": 15, "opacity": 0.5}
         ]},
-        {"type": "section", "label": "Sounds", "open": true, "color": "yellow", "children": [
+        {"type": "section", "label": "Debug", "open": true, "color": "yellow", "children": [
+            {"type": "choice", "label": "Show Performance (F)", "setting": "showPerformanceActivation", "options": [{"label": "Hold", "value": "hold"}, {"label": "Toggle", "value": "toggle"}]},
+            {"type": "choice", "label": "Show Debug (I)", "setting": "showDebugActivation", "options": [{"label": "Hold", "value": "hold"}, {"label": "Toggle", "value": "toggle"}]},
+            {"type": "choice", "label": "Render Debug (R)", "setting": "renderDebugActivation", "options": [{"label": "Hold", "value": "hold"}, {"label": "Toggle", "value": "toggle"}]}
+        ]},
+        {"type": "section", "label": "Sounds", "open": true, "color": "lime", "children": [
             {"type": "slider", "label": "Volume", "setting": "volume", "min": 0, "max": 1, "step": 0.05}
         ]}
     ]},

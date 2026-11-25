@@ -598,16 +598,34 @@
             }
         }
 
-        #leave-button {
-            width: calc(64px*var(--ui));
-            height: calc(64px*var(--ui));
-            position: fixed;
-            top: calc(12px*var(--ui));
-            left: calc(12px*var(--ui));
-            --c: var(--gray);
-            --c-outline: var(--gray-outline);
-            color: var(--c-outline);
-            z-index: 1;
+        #hud {
+            opacity: 1;
+            &.hidden {
+                background-color: transparent;
+                pointer-events: none;
+                opacity: 0;
+            }
+            #leave-button {
+                width: calc(64px*var(--ui));
+                height: calc(64px*var(--ui));
+                position: fixed;
+                top: calc(12px*var(--ui));
+                left: calc(12px*var(--ui));
+                --c: var(--gray);
+                --c-outline: var(--gray-outline);
+                color: var(--c-outline);
+                z-index: 1;
+            }
+
+            #bottom-message {
+                position: absolute;
+                bottom: calc(12px*var(--ui));
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: calc(24px*var(--ui));
+                color: #000000;
+                white-space: nowrap;
+            }
         }
     </style>
 </head>
@@ -648,11 +666,12 @@
         <div id="tips"></div>
     </div>
     <div id="hud">
-        <div id="notifications"></div>
-        <div id="leaderboard"></div>
         <button id="leave-button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-leave"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
         </button>
+        <div id="notifications"></div>
+        <div id="leaderboard"></div>
+        <div id="bottom-message">Waiting for players</div>
     </div>
     <div id="settings-panel" class="panel"></div>
     <div id="changelog-panel" class="panel"></div>
@@ -715,9 +734,11 @@
                 tips: document.getElementById('tips'),
             },
             hud: {
+                myself: document.getElementById('hud'),
+                leaveButton: document.getElementById('leave-button'),
                 notifications: document.getElementById('notifications'),
                 leaderboard: document.getElementById('leaderboard'),
-                leaveButton: document.getElementById('leave-button'),
+                bottomMessage: document.getElementById('bottom-message'),
             },
             settings: document.getElementById('settings-panel'),
             changelog: document.getElementById('changelog-panel'),
@@ -831,6 +852,9 @@
                     playSound('bwooop', 1, randomFloat(0.9,1.1))
                 }
             }
+            if (e.key == 'f' && !e.repeat && settings.showPerformanceActivation == 'toggle') performanceOpen = !performanceOpen
+            if (e.key == 'i' && !e.repeat && settings.showDebugActivation == 'toggle') debugOpen = !debugOpen
+            if (e.key == 'r' && !e.repeat && settings.renderDebugActivation == 'toggle') renderDebugOpen = !renderDebugOpen
         })
         addEventListener('keyup', e => {
             let key = e.key.toLowerCase()
@@ -1277,7 +1301,7 @@
             ctx.restore()
         }
 
-        function drawText(text, x, y, size, fillColor, outlineColor, thickness = 0, dir = 0, stacked = false) {
+        function drawText(text, x, y, size, fillColor, outlineColor, thickness = 0, dir = 0, stacked = false, align = 'center') {
             ctx.save() // if stacked = true, anchor line 1, push the rest downward. otherwise, centre the center as centre
 
             ctx.translate(x, y)
@@ -1289,7 +1313,7 @@
                 text = text.slice(2,-2)
             }
 
-            ctx.textAlign = 'center'
+            ctx.textAlign = align
             ctx.textBaseline = 'middle'
             ctx.font = `${bold ? 'bold ' : ''}${size}px Ubuntu`
 
@@ -1687,7 +1711,7 @@
             }
 
             console.log(`Connecting to server: ${id} (${url})`)
-            ui.menu.message.textContent = `Connecting to lobby ${lobby.id.replace(/^flingy_/, '')}`
+            ui.menu.message.textContent = `Connecting to lobby ${lobby.id}`
             ws = new WebSocket(url)
             ws.binaryType = "arraybuffer"
             
@@ -1773,7 +1797,7 @@
                 case 1: {
                     playerSlot = packet.getUint16(i,true) ;i += 2
                     console.log(`Connected to lobby as player ${playerSlot}`)
-                    ui.menu.message.textContent = `Connected to lobby ${lobby.id.replace(/^flingy_/, '')}`
+                    ui.menu.message.textContent = `Connected to lobby ${lobby.id}`
                     animations.playButton.result = 1
                     playSound('matchfound2', 0.5)
                     scene = 1
@@ -1788,10 +1812,10 @@
 
                     if (disconnectReason == 1) invalidServers[lobby.id] = true
                     disconnectReasons = {
-                        1: `Lobby ${lobby.id.replace(/^flingy_/, '')} doesn't exist`,
-                        2: `Lobby ${lobby.id.replace(/^flingy_/, '')} is full`,
-                        3: `Duplicate connection to ${lobby.id.replace(/^flingy_/, '')}`,
-                        4: `Lobby ${lobby.id.replace(/^flingy_/, '')} is already ingame`,
+                        1: `Lobby ${lobby.id} doesn't exist`,
+                        2: `Lobby ${lobby.id} is full`,
+                        3: `Duplicate connection to ${lobby.id}`,
+                        4: `Lobby ${lobby.id} is already ingame`,
                     }
                     ui.menu.message.textContent = disconnectReasons[disconnectReason]
                     animations.playButton.result = 2
@@ -1890,13 +1914,13 @@
             "Flails get harder to turn the heavier they get.",
             "Left click to release your flail!",
             //"Press I/F to show debug or fps/ping",
-            "Don't spin too fast! or you'll wrap back around the other way.",
             "Each kill gives 1 fling. Spend them to unlock colors!",
             "<-- Flex your fling count in the DISCORD!",
             "*SPIN SPIN SPIN SPIN SPIN SPIN SPIN SPIN*",
             "I am *super* proud of this UI :D",
             "This game was **NOT** vibe-coded.",
-            "You can press esc/tab to open the left sidebar panels",
+            "You can press esc/tab to open the left sidebar panels!",
+            "You can use numbers like 0/1/2/3 to navigate settings."
         ]
         settings = {
             uiScale: 1,
@@ -1908,6 +1932,9 @@
             resolutionScale: 1,
             imageScaling: 'auto',
             smoothing: 'predict',
+            showPerformanceActivation: 'toggle',
+            showDebugActivation: 'toggle',
+            renderDebugActivation: 'toggle',
         }
         playerSlot = -1
         playerColor = 'red'
@@ -1915,8 +1942,11 @@
         unlockedColors = []
         remainingColors = []
         colorPrice = Infinity
-        changelogOpen = false
         settingsPage = 0
+        changelogOpen = false
+        performanceOpen = false
+        debugOpen = false
+        renderDebugOpen = false
         menuBgX = 0
         menuBgY = 0
         cameraX = 0
@@ -1941,7 +1971,7 @@
             let dt = Math.min((now-lastFrame)/1000*30, 1.5)
             lastFrame = now
 
-            // render html
+            // render html // render ui
 
             remainingColors = playerColors.filter(c => !unlockedColors.includes(c))
             colorPrice = unlockedColors.length-3
@@ -1951,7 +1981,7 @@
             ui.menu.shop.buyColor.classList.toggle('maxed', remainingColors.length == 0)
             ui.menu.shop.flings.textContent = `Flings: ${coins}🪙`
             
-            // button animations
+            // menu // button animations
             switch (animations.colorButton.type) {
                 case 0: {
                     ui.menu.shop.buyColor.textContent = `Buy Color: ${colorPrice}🪙`
@@ -2024,7 +2054,7 @@
                             if (animations.playButton.time >= 3*30 && playerSlot == -1) {
                                 animations.playButton.result = 2
                                 invalidServers[lobby.id] = true
-                                ui.menu.message.textContent = `failed to connect to ${lobby.id.replace(/^flingy_/, '')}`
+                                ui.menu.message.textContent = `failed to connect to ${lobby.id}`
                                 animations.playButton.state = 2
                                 playSound('negativeaction2')
                                 ws.close()
@@ -2072,9 +2102,42 @@
                 if (animations.discordButton.progress >= 1) {animations.discordButton.angle = 0}
             }
 
+            // HUD html
+
+            if (playerSlot >= 0) {
+                let bottomText
+                switch (lobby.state) {
+                    case 0: {
+                        let total = lobby.config.minPlayers
+                        let count = lobby.player.filter(p => p.active).length
+                        let remaining = total-count
+                        bottomText = `Need **${remaining}** more player${remaining == 1 ? '' : 's'} (${count}/${total})`
+                    } break
+                    case 1: {
+                        let total = lobby.config.playerLimit
+                        let count = lobby.player.filter(p => p.active).length
+                        let remaining = total-count
+                        bottomText = `Waiting *up to ${lobby.config.countdownTime}s* for up to **${remaining}** player${remaining == 1 ? '' : 's'} (${count}/${total})`
+                    } break
+                    case 2: {
+                        let remaining = lobby.config.gamemode == 'TDM' ? lobby.player.filter(p => p.active && p.hp > 0 && p.colorIndex != lobby.player[playerSlot].colorIndex).length : lobby.player.filter(p => p.active && p.hp > 0).length-1
+                        bottomText = `**${remaining}** ${remaining == 1 ? 'enemy remains' : 'enemies remain'}`
+                    } break
+                    case 3: {
+                        bottomText = `Game over!`
+                    } break
+                }
+                if (bottomText && ui.hud.bottomMessage.dataset.markdown != bottomText) {
+                    ui.hud.bottomMessage.dataset.markdown = bottomText
+                    ui.hud.bottomMessage.replaceChildren(parseMarkdown(bottomText))
+                }
+            }
+
+            // Scenes
+
             ui.menu.myself.classList.toggle('hidden', scene != 0)
             if (scene != 0) {ui.menu.tips.style.opacity = 0}
-
+            ui.hud.myself.classList.toggle('hidden', scene == 0)
             if (lobby.state == 3) ui.menu.message.textContent = `Game over! Play again?`
 
             if (playerSlot >= 0) {
@@ -2137,8 +2200,6 @@
                 scene = 0
             }
 
-
-
             // render shit
             ctx.clearRect(-canvas.width/scale/2, -canvas.height/scale/2, canvas.width/scale, canvas.height/scale)
 
@@ -2191,7 +2252,7 @@
                     drawText(p.username, p.x-cameraX, p.y-cameraY-10, 8, '#000000', '#ffffff', 1)
                 }
 
-                // HUD
+                // HUD canvas
 
                 gap = 12*(fov/1080)*settings.uiScale
 
@@ -2218,7 +2279,43 @@
                     }
                 }
 
+                // Debug
+                if (settings.showDebugActivation == 'toggle' ? debugOpen : isKeyPressed('i')) {
+                    ui.hud.leaveButton.style.visibility = 'hidden'
+                    let p = lobby.player[playerSlot]
+                    drawText(
+`=== PERFORMANCE === (I to close)
+FPS: # 
+MSPT: #
+Ping: #ms
+Server TPS: ${lobby.tps}
 
+=== LOBBY INFO === 
+Map Radius: ${lobby.borderRadius} units
+Position: (${Math.round(cameraX)}, ${Math.round(cameraY)}
+Players: #/#. # humans
+Health: ${p.hp} HP, ${p.alive ? 'alive' : 'dead'}
+
+=== MISC ===
+invalidServers: ${JSON.stringify(invalidServers)}
+`, -screenSizeX/2+4+gap, -screenSizeY/2+4+gap, 8, '#000000', '#ffffff', 1, 0, true, 'left')
+                } else if (settings.showPerformanceActivation == 'toggle' ? performanceOpen : isKeyPressed('f')) {
+                    ui.hud.leaveButton.style.visibility = 'hidden'
+                    let p = lobby.player[playerSlot]
+                    drawText(
+`=== PERFORMANCE === (F to close)
+FPS: # 
+MSPT: #
+Ping: #ms
+`, -screenSizeX/2+4+gap, -screenSizeY/2+4+gap, 8, '#000000', '#ffffff', 1, 0, true, 'left')
+                } else {ui.hud.leaveButton.style.visibility = 'visible'}
+                if (settings.renderDebugActivation == 'toggle' ? renderDebugOpen : isKeyPressed('r')) {
+                    for (let i = 0; i < playerColors.length; i++) {
+                        let size = 30
+                        drawRect(((i-(playerColors.length-1)/2)*size)-size/2, -screenSizeY/2+size/2, size, size, colorsToHex(playerColors[i]), colorsToOutlineHex(playerColors[i]), 2)
+                        drawText(playerColors[i], ((i-(playerColors.length-1)/2)*size)-size/2, -screenSizeY/2+size+6, 7, colorsToHex(playerColors[i]), colorsToOutlineHex(playerColors[i]), 1)
+                    }
+                }
                 
             }
             

@@ -11,15 +11,14 @@ import (
 // Structs
 type LobbyConfig struct {
 	ID              string  `json:"id"`
-	Name            string  `json:"name"`
+	Gamemode        string  `json:"gamemode"`
+	TeamCount       int     `json:"teamCount"`
 	PlayerLimit     int     `json:"playerLimit"`
+	MinPlayers      int     `json:"minPlayers"`
 	BorderRadius    int     `json:"borderRadius"`
 	MinBorderRadius int     `json:"minBorderRadius"`
 	MatchTime       int     `json:"matchTime"`
 	CountdownTime   int     `json:"countdownTime"`
-	BotSpinSpeed    int     `json:"botSpinSpeed"`
-	BotAccuracy     int     `json:"botAccuracy"`
-	BotPercentage   float64 `json:"botPercentage"`
 	AddMoney        bool    `json:"addMoney"`
 }
 type Player struct {
@@ -40,6 +39,7 @@ type Player struct {
 	Rank                     int
 	Immune                   bool
 	ColorIndex               int
+	Team                     int
 
 	LeftMouseDown    bool
 	FlingUsed        bool
@@ -211,6 +211,13 @@ func spawnPlayer(l *Lobby, slot int) {
 	p.Rank = 0
 	p.Immune = true
 	p.TimeLeftImmune = 60
+
+	switch l.Config.Gamemode {
+	case "FFA":
+		p.Team = -1
+	case "TDM":
+		p.Team = slot % l.Config.TeamCount
+	}
 }
 
 func despawnPlayer(l *Lobby, slot int) {

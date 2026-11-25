@@ -5,6 +5,17 @@
 - there is no duplicate connection check. a client can just: connect multiple times lol.
   - in fact, there's no checks at all. a player can just join midgame rn.
 
+### Team Mode
+- FFA currently has no friendly fire either: collision needs `p.Team == -1 || p.Team != c.Team`
+- assign teams balanced by active player count, not `slot % 2`
+- win condition: last team standing instead of `playersAlive <= 1`
+- rank/placement per team instead of per player
+- send Team to the client (packet 3 flags bits 3-7 are all colourIndex, so needs an encoding decision)
+
+### Bots
+- implement bots
+- use bots to fill empty team slots in TDM so odd counts aren't 2v1/3v2; until then uneven teams are allowed
+
 ### Packets
 - send statetick so the client can calc this for himself
 

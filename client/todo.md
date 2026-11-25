@@ -7,6 +7,7 @@
 
 ### UI
 - right click to open color dropdown
+- gamemode selector in the menu (FFA / 2TDM), also used to filter `pickServer`
 - hide the HUD when scene == 0 (leave button etc.)
 - tips are meant to be randomly shuffled every cycle like in old flingy.io
 
@@ -14,6 +15,7 @@
 - debug menu: draw the squares for the borderScale/mouseScale clamp ranges
 
 ### Misc
+- expire `invalidServers` marks after ~30-60s using timestamps instead of blacklisting for the whole session
 - interpolation/predict for entity movement (the smoothing setting)
 - reuse one global `TextDecoder` instead of creating one per username in packets 4/5
 - // in the future, make it wait for a server to be available, since that's the point after all

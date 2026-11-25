@@ -1,4 +1,10 @@
 [
-    {"ID": "flingy_ffa_", "Name": "FFA", "PlayerLimit": 8, "BorderRadius": 640, "MinBorderRadius": 100, "matchTime": 217, "countdownTime": 15, "botSpinSpeed": 120, "botAccuracy": 250, "botPercentage": 0.5, "addMoney": true},
-    {"ID": "flingy_ffa_", "Name": "FFA", "PlayerLimit": 8, "BorderRadius": 640, "MinBorderRadius": 100, "matchTime": 217, "countdownTime": 15, "botSpinSpeed": 120, "botAccuracy": 250, "botPercentage": 0.5, "addMoney": true}
+    {"ID": "ffa", "gamemode": "FFA", "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 15, "addMoney": true},
+    {"ID": "ffa", "gamemode": "FFA", "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 15, "addMoney": true},
+    {"ID": "ffa", "gamemode": "FFA", "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 15, "addMoney": true},
+    {"ID": "ffa", "gamemode": "FFA", "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 15, "addMoney": true},
+    {"ID": "2tdm", "gamemode": "TDM", "teamCount": 2, "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 20, "addMoney": true},
+    {"ID": "2tdm", "gamemode": "TDM", "teamCount": 2, "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 20, "addMoney": true},
+    {"ID": "2tdm", "gamemode": "TDM", "teamCount": 2, "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 20, "addMoney": true},
+    {"ID": "2tdm", "gamemode": "TDM", "teamCount": 2, "playerLimit": 8, "minPlayers": 2, "borderRadius": 640, "minBorderRadius": 100, "matchTime": 217, "countdownTime": 20, "addMoney": true}
 ]
