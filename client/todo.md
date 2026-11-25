@@ -7,7 +7,7 @@
 
 ### UI
 - right click to open color dropdown
-- style the HUD leave button
+- hide the HUD when scene == 0 (leave button etc.)
 - tips are meant to be randomly shuffled every cycle like in old flingy.io
 
 ### Debug

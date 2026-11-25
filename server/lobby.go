@@ -45,6 +45,8 @@ type Player struct {
 	FlingUsed        bool
 	TimeLeftImmune   float64
 	TimeUntilRespawn float64
+	SpinTarget       float64
+	LastTarget       float64
 }
 type Lobby struct {
 	Config               LobbyConfig

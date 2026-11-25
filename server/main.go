@@ -244,20 +244,32 @@ func main() {
 
 					// direction
 
+					raw := directionTo(p.WorldMouseX, p.WorldMouseY, p.X, p.Y)
+					p.SpinTarget += math.Remainder(raw-p.LastTarget, 360)
+					p.LastTarget = raw
+
 					if p.FlailConnected {
-						diff := math.Remainder(directionTo(p.WorldMouseX, p.WorldMouseY, p.X, p.Y)-p.Direction, 360)
+						diff := p.SpinTarget - p.Direction
+						maxSpeed := float64(180)
+						if diff > 360+maxSpeed {
+							p.SpinTarget -= 360 * math.Ceil((diff-(360+maxSpeed))/360)
+						} else if diff < -360-maxSpeed {
+							p.SpinTarget += 360 * math.Ceil((-diff-(360+maxSpeed))/360)
+						}
+						diff = p.SpinTarget - p.Direction
 
 						// change 2.0 to make it snappier
 						gain := 0.03 * (1 - math.Pow(0.9, 2.0)) / (1 - 0.9)
 						damping := math.Pow(0.9, 2.0*dt)
 						brake := 1 + math.Sqrt(p.FlailRadius*2)/10
-						accel := diff * gain / brake
+						accel := clamp(diff, -maxSpeed, maxSpeed) * gain / brake
 
 						p.AngularVelocity = p.AngularVelocity*damping + accel*dt
 						p.Direction += p.AngularVelocity * dt
 					} else {
 						p.AngularVelocity = 0
 						p.Direction = directionTo(p.WorldMouseX, p.WorldMouseY, p.X, p.Y)
+						p.SpinTarget, p.LastTarget = raw, raw
 					}
 
 					sin, cos := math.Sincos(degToRad(p.Direction))
@@ -275,7 +287,7 @@ func main() {
 					}
 
 					if p.FlailConnected {
-						p.FlailRadius = clamp(p.FlailRadius+((math.Abs(p.AngularVelocity)/100-0.05)*dt), 2.5, 50)
+						p.FlailRadius = clamp(p.FlailRadius+((math.Abs(p.AngularVelocity)/150-0.05)*dt), 2.5, 50)
 					} else {
 						if p.FlailRadius > 2.5 {
 							p.FlailRadius = clamp(p.FlailRadius-(0.15*dt), 0, 50)
