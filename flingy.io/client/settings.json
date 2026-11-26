@@ -16,7 +16,7 @@
             {"type": "toggle", "label": "Show Minimap", "setting": "showMinimap"}
         ]},
         {"type": "section", "label": "Rendering", "open": true, "color": "orange", "children": [
-            {"type": "slider", "label": "Resolution Scale", "setting": "resolutionScale", "min": 0.25, "max": 2, "step": 0.25},
+            {"type": "slider", "label": "Resolution Scale", "setting": "resolutionScale", "min": 0.25, "max": 1, "step": 0.25},
             {"type": "text", "label": "Lower = more fps, but blurrier. Higher = flex your gpu", "size": 15, "opacity": 0.5},
             {"type": "choice", "label": "Image Scaling", "setting": "imageScaling", "options": [{"label": "Pixelated", "value": "pixelated"}, {"label": "Smooth", "value": "auto"}]},
             {"type": "choice", "label": "Smooth", "setting": "smoothing", "options": [{"label": "Off", "value": "off"}, {"label": "Interpolate", "value": "interpolate"}, {"label": "Predict", "value": "predict"}]},
