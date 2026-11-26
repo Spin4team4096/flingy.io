@@ -12,3 +12,6 @@ dev.sh
 
 # local dev tools
 /tools
+
+# shared folder symlink
+/client/shared
