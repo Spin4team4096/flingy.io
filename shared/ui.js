@@ -1,4 +1,4 @@
-// renderPanelNodes uses, at call time: settings, settingsData, settingsPage, ui.settings, loadSettings(), playSound(), randomFloat(), and renderPanel()
+// required vars: settings, settingsData, settingsPage, ui.settings, loadSettings(), playSound(), randomFloat(), renderPanel(), ui.menu.status
 
 function parseMarkdown(text) {
     let fragment = document.createDocumentFragment()
@@ -239,5 +239,15 @@ function renderPanelNodes(parent, nodes) {
                 if (node.children) {renderPanelNodes(text, node.children)}
             } break
         }
+    }
+}
+
+function renderStatus(statusMessage) {
+    if (statusMessage && ui.menu.status) {
+        ui.menu.status.replaceChildren(parseMarkdown(statusMessage.text))
+        ui.menu.status.style.setProperty('--c', `var(--${statusMessage.color})`)
+        ui.menu.status.style.setProperty('--c-outline', `var(--${statusMessage.color}-outline)`)
+    } else if (ui.menu.status) {
+        ui.menu.status.replaceChildren()
     }
 }

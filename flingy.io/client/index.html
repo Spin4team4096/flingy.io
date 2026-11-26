@@ -11,6 +11,7 @@
     <script src="shared/colors.js"></script>
     <script src="shared/draw.js"></script>
     <script src="shared/ui.js"></script>
+    <script src="shared/storage.js"></script>
     <link rel="stylesheet" href="shared/ui.css">
     <style>
         @font-face {
@@ -495,10 +496,11 @@
         })
         database.ref("flingy2/status").on("value", (snapshot) => {
             statusMessage = snapshot.val()
+            renderStatus(statusMessage)
             if (statusMessage) {
-                ui.menu.status.replaceChildren(parseMarkdown(statusMessage.text))
-                ui.menu.status.style.setProperty('--c', `var(--${statusMessage.color})`)
-                ui.menu.status.style.setProperty('--c-outline', `var(--${statusMessage.color}-outline)`)
+                setStoredKey('flingy_v2_statusMessage', JSON.stringify(statusMessage))
+            } else {
+                deleteStoredKey('flingy_v2_statusMessage')
             }
         })
 
@@ -566,14 +568,6 @@
         }
 
         // Specific Functions
-
-        function setStoredKey(key, value) {
-            localStorage.setItem(key, value)
-        }
-
-        function getStoredKey(key) {
-            return localStorage.getItem(key) || ''
-        }
 
         function pickServer() {
             console.log(`Picking server...`)
@@ -1364,6 +1358,9 @@ Packet Timing: last: ${prev ? `${(curr.timestamp-prev.timestamp).toFixed(1)}` : 
         }
 
         function localStorageLoop() {
+            try{statusMessage = JSON.parse(getStoredKey('flingy_v2_statusMessage'))} catch {statusMessage = null}
+            renderStatus(statusMessage)
+
             storageVersion = getStoredKey('flingy_v2_version') || ''
             if (storageVersion == 'v2.0.0+') {
                 // load existing data
