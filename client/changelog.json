@@ -3,32 +3,42 @@
     "children": [
         {
             "type": "section",
-            "label": "pre-v2.0.0 (indev)",
+            "label": "v2.0.0",
             "open": true,
             "color": "red",
             "children": [
                 {
                     "type": "text",
-                    "label": "(2026.11.08 at 05:19 GMT)",
+                    "label": "(2026.11.25 at 23:36 GMT)",
                     "opacity": 0.5,
                     "size": 15
                 },
                 {
                     "type": "text",
-                    "label": "^^^ I am actively working on it, so this changelog will basically be nonexistent until release",
+                    "label": "COMPLETELY rewrote flingy.io from scratch! Took me 43 days :O",
                     "opacity": 0.5,
                     "size": 15
-                },
-                {
-                    "type": "text",
-                    "label": "I am basically rewriting the entire game from scratch (not vibe-coded)"
                 },
                 {
                     "type": "server",
                     "children": [
                         {
                             "type": "point",
-                            "label": "Literally rewrote it in Go."
+                            "label": "Literally rewrote it in Go. What's different:",
+                            "children": [
+                                {
+                                    "type": "point",
+                                    "label": "Added a Team mode! (tho you can't select gamemodes yet so you are at the mercy of the server)"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "Bots don't exist yet, so you actually need friends to play with-"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "Spinning is fixed! You no longer spin \"too fast\", and there's a built-in speed limit"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -37,15 +47,31 @@
                     "children": [
                         {
                             "type": "point",
-                            "label": "I rewrote the entire game from scratch!",
+                            "label": "I also rewrote this from scratch! What's different:",
                             "children": [
                                 {
                                     "type": "point",
-                                    "label": "I am super proud of the UI :D"
+                                    "label": "The UI looks absolutely awesome (it uses html/css and is properly animated)"
                                 },
                                 {
                                     "type": "point",
-                                    "label": "Also, it runs at your monitor's refresh rate, so no more 30fps cap. You're welcome, ==@quasll== :P"
+                                    "label": "There are SETTINGS OMG (keybinds and themes are coming soon)"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "THERE IS AN INGAME CHANGELOG"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "Outlines are fixed so they represent the actual shape size (previously, outlines increased the total size lol)"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "The debug/performance menu is very detailed (press `F`/`I`/`O` to toggle)"
+                                },
+                                {
+                                    "type": "point",
+                                    "label": "There is not yet a leaderboard, throw path indicator, notification system, death screen, or ingame sound."
                                 }
                             ]
                         }
