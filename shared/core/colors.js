@@ -45,6 +45,12 @@ colors = {
     }
 }
 
+playerColors = ['red', 'coral', 'orange', 'yellow', 'lime', 'green', 'mint', 'cyan', 'blue', 'navy', 'purple', 'pink', 'magenta', 'burgundy', 'maroon', 'brown', 'tan', 'white', 'gray', 'black']
+for (let color of playerColors) {
+    document.documentElement.style.setProperty(`--${color}`, colors.fill[color])
+    document.documentElement.style.setProperty(`--${color}-outline`, colors.outline[color])
+}
+
 function toHex(num) {
     return Math.round(clamp(num, 0, 1)*255).toString(16).padStart(2, "0")
 }

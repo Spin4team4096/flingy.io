@@ -14,7 +14,7 @@ import (
 
 func startWebsocketServer() {
 	http.HandleFunc("/ws", handleConnection)
-	go http.ListenAndServe("127.0.0.1:4096", nil)
+	go http.ListenAndServe("127.0.0.1:4095", nil)
 	log.Println("Started websocket server")
 }
 

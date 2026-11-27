@@ -1,3 +1,60 @@
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-lightitalic.woff2") format("woff2");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-mediumitalic.woff2") format("woff2");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-bolditalic.woff2") format("woff2");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+        
 * {
     box-sizing: border-box;
     border-radius: calc(8px*var(--ui));
@@ -21,6 +78,7 @@ a {
     height: 100%;
     z-index: 0;
     image-rendering: var(--image-rendering);
+    border-radius: 0;
 }
 
 #menu {
@@ -218,7 +276,7 @@ button::before {
     display: flex;
     flex-direction: row;
     gap: calc(12px*var(--ui));
-    #flings {
+    #coins {
         display: flex;
         align-items: center;
         justify-content: center;

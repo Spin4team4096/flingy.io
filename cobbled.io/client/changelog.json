@@ -1,0 +1,20 @@
+{
+    "title": "CHANGELOG",
+    "children": [
+        {
+            "type": "text",
+            "label": "The below changelogs are from the shit v3 version:",
+            "size": 20
+        },
+        {
+            "type": "text",
+            "label": "The below changelogs are from the old v2 version:",
+            "size": 20
+        },
+        {
+            "type": "text",
+            "label": "The below changelogs are from the very old v1 version:",
+            "size": 20
+        }
+    ]
+}

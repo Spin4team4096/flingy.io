@@ -1,7 +1,753 @@
-COBBLED.IO VERSION 3 COMING SOON
-<br>
-<br>
-JOIN THE DISCORD AND PLAY FLINGY.IO FOR NOW
-<br>
-<br>
-https://flingy.io
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cobbled.io</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22184.359%22%20height%3D%22184.359%22%20viewBox%3D%220%200%20184.359%20184.359%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22a%22%20cx%3D%22291.429%22%20cy%3D%22133.254%22%20r%3D%2288.18%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f25557%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e02d30%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22b%22%20cx%3D%22228.308%22%20cy%3D%22193.389%22%20r%3D%2227.758%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f25557%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e02d30%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22c%22%20cx%3D%22282.752%22%20cy%3D%22138.945%22%20r%3D%2227.758%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f25557%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e02d30%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Cg%20stroke-miterlimit%3D%2210%22%3E%3Cpath%20fill%3D%22url(%23a)%22%20stroke%3D%22%23992b2d%22%20stroke-width%3D%228%22%20d%3D%22M151.865%20180.044c0-48.7%2039.479-88.18%2088.18-88.18%2048.7%200%2088.179%2039.48%2088.179%2088.18s-39.48%2088.18-88.18%2088.18-88.18-39.48-88.18-88.18z%22%20transform%3D%22translate(-147.865%20-87.865)%22%2F%3E%3Cpath%20fill%3D%22%23b82527%22%20d%3D%22M7.951%2092.535c0-24.207%2011.218%2025.015%2038.54%2053.455%2024.905%2025.926%2067.311%2030.33%2045.245%2030.33-46.273%200-83.785-37.512-83.785-83.785%22%2F%3E%3Cpath%20fill%3D%22%23e43639%22%20stroke%3D%22%23fff%22%20stroke-width%3D%228%22%20d%3D%22m79.286%20118.976-13.991-13.991%2029.327-29.328%2013.992%2013.991z%22%2F%3E%3Cpath%20fill%3D%22url(%23b)%22%20stroke%3D%22%23fff%22%20stroke-width%3D%228%22%20d%3D%22M191.403%20224.932c-9.78-11.805-8.14-29.304%203.665-39.084s29.304-8.14%2039.084%203.665%208.14%2029.303-3.665%2039.084c-11.805%209.78-29.303%208.14-39.084-3.665z%22%20transform%3D%22translate(-147.865%20-87.865)%22%2F%3E%3Cpath%20fill%3D%22%23b82527%22%20d%3D%22M42.041%20112.958c1.988-6.17-4.684%206.269%2011.948%2019.94%209.348%206.93%2017.001%208.094%2020.908%208.007-.026.012-.053.037-.065.047-22.272%209.203-37.926-12.049-32.794-27.958z%22%2F%3E%3Cpath%20fill%3D%22url(%23c)%22%20stroke%3D%22%23fff%22%20stroke-width%3D%228%22%20d%3D%22M245.848%20170.487c-9.78-11.805-8.14-29.303%203.665-39.084%2011.805-9.78%2029.303-8.14%2039.084%203.665%209.78%2011.805%208.14%2029.304-3.665%2039.084s-29.304%208.14-39.084-3.665z%22%20transform%3D%22translate(-147.865%20-87.865)%22%2F%3E%3Cpath%20fill%3D%22%23b82527%22%20d%3D%22M96.453%2058.546c1.987-6.17-4.685%206.269%2011.948%2019.94%209.348%206.93%2017.001%208.094%2020.908%208.007-.026.012-.054.037-.066.047-22.272%209.204-37.925-12.049-32.793-27.958z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="shared/io-game/ui.css">
+    <style>
+        :root {
+            --main: var(--red);
+            --main-outline: var(--red-outline);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="game"></canvas>
+    <div id="menu">
+        <div id="logo">COBBLED.IO</div>
+        <div id="menu-controls">
+            <button id="color-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-palette"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+            </button>
+            <input id="username" maxlength="20" placeholder="Enter username..." autocomplete="off" spellcheck="false">
+            <button id="play-button" class="idle">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-finished"><path d="M20 6 9 17l-5-5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-retry"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div id="message">The game isn't playable (yet).</div>
+        <div id="status"></div>
+        <div id="gamemode-list"></div>
+        <div id="shop">
+            <div id="coins">Coins: #🪙</div>
+            <button id="buy-color" title="Buy a random color! (# left)">Buy Color: #🪙</button>
+        </div>
+        <div id="bottom-row">
+            <button id="settings-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button id="changelog-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-changelog"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+            </button>
+            <button id="discord-button" title="Join the Discord!">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-discord"><path d="M19.95 10.05a7 7 0 011.412 7.872 1 1 0 00-.058.787l.675 2.089a1 1 0 01-1.236 1.168l-2.155-.631a1 1 0 00-.745.06 7 7 0 01-7.793-1.445"/><path d="M2.696 12.708a1 1 0 00-.058-.785 7 7 0 113.518 3.473 1 1 0 00-.744-.061l-2.155.63a1 1 0 01-1.236-1.167z"/></svg>
+            </button>
+        </div>
+        <div id="tips"></div>
+    </div>
+    <div id="hud">
+        <button id="leave-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-leave"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+        </button>
+        <div id="notifications"></div>
+        <div id="leaderboard"></div>
+    </div>
+    <div id="settings-panel" class="panel"></div>
+    <div id="changelog-panel" class="panel"></div>
+    <script src="shared/core/math.js"></script>
+    <script src="shared/core/colors.js"></script>
+    <script src="shared/core/draw.js"></script>
+    <script src="shared/core/storage.js"></script>
+    <script src="shared/io-game/sound.js"></script>
+    <script src="shared/io-game/firebase.js"></script>
+    <script src="shared/io-game/ui.js"></script>
+    <script src="shared/core/input.js"></script>
+    <script>
+
+        if (window.location.hostname == 'cobbled.io' || window.location.hostname == 'beta.cobbled.io') {
+            console.log('%c🔴🔴🔴 YOU\'RE ON THE NON-LOCAL VERSION THAT\'S PUSHED ONLINE (may be outdated)🔴🔴🔴', 'background: rgba(255,0,0,0.5); color: black; font-size: 16px; font-weight: bold; padding: 4px;')
+        } else {
+            console.log('%c✅ You\'re local, all good', 'background: rgba(0,255,0,0.2); color: black; font-size: 16px; padding: 4px;')
+        }
+        
+        // Setup
+
+        // UI Setup
+        fov = 360 // iirc
+        scale = 1
+        uiScale = 1
+
+        const canvas = document.getElementById('game')
+        const ctx = canvas.getContext('2d')
+
+        // Firebase Setup
+
+        watchFirebaseServers("cobbled4/lobbies")
+        watchFirebaseStatus("cobbled4/status", 'cobbled_v4_statusMessage')
+        
+        // Event Listeners
+
+        addEventListener('resize', resize)
+        function resize() {
+            canvas.width = Math.round(innerWidth*devicePixelRatio*settings.resolutionScale)
+            canvas.height = Math.round(innerHeight*devicePixelRatio*settings.resolutionScale)
+
+            scale = Math.max(canvas.width/(fov*16/9), canvas.height/fov)
+            uiScale = Math.max(innerWidth, innerHeight*16/9)/1920*settings.uiScale
+
+            document.documentElement.style.setProperty('--ui', uiScale)
+            ctx.setTransform(scale, 0, 0, scale, canvas.width/2, canvas.height/2)
+        }
+
+        addEventListener('keydown', e => {
+            if (settings.keybinds.toggleSettings.includes(e.key.toLowerCase()) && !e.repeat) toggleSettings()
+            if (settings.keybinds.toggleChangelog.includes(e.key.toLowerCase()) && !e.repeat) toggleChangelog()
+            if (settingsPage != 0) {
+                if (e.key == '0' && !e.repeat) {
+                    settingsPage = 1
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, 0.9)
+                }
+                if (e.key == '1' && !e.repeat) {
+                    settingsPage = 2
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, randomFloat(0.9,1.1))
+                }
+                if (e.key == '2' && !e.repeat) {
+                    settingsPage = 3
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, randomFloat(0.9,1.1))
+                }
+                if (e.key == '3' && !e.repeat) {
+                    settingsPage = 4
+                    renderPanel(ui.settings, settingsData[settingsPage])
+                    playSound('bwooop', 1, randomFloat(0.9,1.1))
+                }
+            }
+            if (settings.keybinds.showPerformance.includes(e.key.toLowerCase()) && !e.repeat && settings.showPerformanceActivation == 'toggle') performanceOpen = !performanceOpen
+            if (settings.keybinds.showDebug.includes(e.key.toLowerCase()) && !e.repeat && settings.showDebugActivation == 'toggle') debugOpen = !debugOpen
+            if (settings.keybinds.renderDebug.includes(e.key.toLowerCase()) && !e.repeat && settings.renderDebugActivation == 'toggle') renderDebugOpen = !renderDebugOpen
+            if (settings.keybinds.toggleLeaderboard.includes(e.key.toLowerCase()) && !e.repeat) settings.showLeaderboard = !settings.showLeaderboard
+            if (settings.keybinds.toggleMinimap.includes(e.key.toLowerCase()) && !e.repeat) settings.showMinimap = !settings.showMinimap
+        })
+
+        // Specific Functions
+
+        function pickServer() {
+            console.log(`Picking server...`)
+
+            let available = []
+
+            for (const id in servers) {
+                if (invalidServers[id]) continue
+                if (Date.now()-(servers[id].lastSeen || 0) > 10*60*1000) continue
+                if (servers[id].status != 0) continue
+                if (!servers[id].config) continue
+                available.push({id: id, players: servers[id].playerCount || 0})
+            }
+
+            if (available.length == 0 && Object.keys(invalidServers).length) {
+                invalidServers = {}
+            }
+
+            if (available.length == 0) {
+                console.log("no joinable servers")
+                animations.playButton.result = Object.keys(servers || {}).length == 0 ? 2 : 3
+                playSound('negativeaction2')
+                ui.menu.message.textContent = `No joinable servers`
+                setTimeout(() => {
+                    animations.playButton.state = 2
+                }, 100)
+                // in the future, make it wait for a server to be available, since that's the point after all
+                return
+            }
+
+            available.sort((a,b) => b.players-a.players)
+
+            server = available[0]
+            connect(server.id, servers[server.id].url)
+        }
+
+        function connect(id, url) {
+            if (ws) ws.close()
+
+            prev = curr = null
+            lobby.id = id
+            lobby.url = url
+            lobby.config = servers[id].config
+            lobby.player = []
+            for (let i = 0; i < lobby.config.playerLimit; i++) {
+                lobby.player.push({
+                    active: false, // now this is actually game-specific, hmmm. i could probably move this out of the connect function then? or pass in smth to this function
+                })
+            }
+
+            console.log(`Connecting to server: ${id} (${url})`)
+            ui.menu.message.textContent = `Connecting to lobby ${lobby.id}`
+            ws = new WebSocket(url)
+            ws.binaryType = "arraybuffer"
+            
+            ws.addEventListener('open', () => {
+                console.log(`Connected to websocket of lobby ${id} (${url})`)
+                ws.send(encodePacket(-1, {
+                    id: id,
+                    username: username,
+                }))
+            })
+
+            ws.addEventListener('message', (event) => {
+                decodePacket(event.data)
+            })
+
+            ws.addEventListener('close', (event) => {
+                console.log(`Disconnected from lobby ${id} (${url}) - Code: ${event.code}, Reason: ${event.reason}, WasClean: ${event.wasClean}`)
+                playerSlot = -1
+            })
+
+            ws.addEventListener('error', () => {
+                console.log(`Connection error on lobby ${id} (${url})`)
+            })
+        }
+
+        function encodePacket(packetType, data) {
+            version = 1
+            switch (packetType) {
+                case -1: {
+                    let lobbyID = new TextEncoder().encode(data.id)
+                    let usernameText = new TextEncoder().encode(data.username)
+
+                    let bufferSize = 2+1+lobbyID.length+1+usernameText.length
+                    let buffer = new ArrayBuffer(bufferSize)
+                    let packet = new DataView(buffer)
+                    let i = 0
+                    packet.setUint8(i, version) ;i += 1
+                    packet.setInt8(i, packetType) ;i += 1
+
+                    packet.setUint8(i, lobbyID.length, true) ;i += 1
+                    for (let j=0; j < lobbyID.length; j++) {
+                        packet.setUint8(i+j, lobbyID[j])
+                    }
+                    i += lobbyID.length
+
+                    packet.setUint8(i, usernameText.length, true) ;i += 1
+                    for (let j=0; j < usernameText.length; j++) {
+                        packet.setUint8(i+j, usernameText[j])
+                    }
+                    i += usernameText.length
+
+                    return packet
+                } break
+                default: console.warn(`idk what packet ${packetType} is`) ;return null
+            }
+        }
+        
+        function decodePacket(data) {
+            let packet = new DataView(data)
+            let i = 0
+            let version = packet.getUint8(i) ;i += 1
+            if (version != 1) {console.warn(`outdated version ${version}, wtf!?`); return}
+            let packetType = packet.getInt8(i) ;i += 1
+            switch (packetType) {
+                case 1: {
+                    playerSlot = packet.getUint16(i,true) ;i += 2
+                    console.log(`Connected to lobby as player ${playerSlot}`)
+                    ui.menu.message.textContent = `Connected to lobby ${lobby.id}`
+                    animations.playButton.result = 1
+                    playSound('matchfound2', 0.5)
+                    scene = 1
+                    animations.playButton.state = 1
+                    setTimeout(() => {
+                        animations.playButton.state = 2
+                    }, 500)
+                } break
+                case 2: {
+                    disconnectReason = packet.getUint8(i) ;i += 1
+                    console.log(`Disconnected for reason ${disconnectReason}`)
+
+                    if (disconnectReason == 1) invalidServers[lobby.id] = true
+                    disconnectReasons = {
+                        1: `Lobby ${lobby.id} doesn't exist`,
+                        2: `Lobby ${lobby.id} is full`,
+                        3: `Duplicate connection to ${lobby.id}`,
+                        4: `Lobby ${lobby.id} is already ingame`,
+                    }
+                    ui.menu.message.textContent = disconnectReasons[disconnectReason]
+                    animations.playButton.result = 2
+                    animations.playButton.state = 2
+                    playSound('negativeaction2')
+                    ws.close()
+                } break
+                default: console.warn(`idk what packet ${packetType} is`) ;break
+            }
+            
+        }
+
+        function interpolateLobby(a) {
+            // specific to this game
+        }
+
+        // init 
+        server = null
+        servers = {}
+        invalidServers = {}
+        prev = null
+        curr = null
+        lobby = {
+            id: null,
+            config: {},
+            tick: -1,
+            running: false,
+            closing: false,
+            state: 0,
+            tps: 0,
+            player: [],
+            // and more cuz lobby is kinda unique
+        }
+        tips = [
+            "***DRINK WATER***",
+            "This menu background is very temporary lol",
+            "Press **F/I/O** to show fps/ping or debug",
+            "I am *super* proud of this UI :D",
+            "This game was **NOT** vibe-coded.",
+            "You can press **esc/tab** to open the left sidebar panels!",
+            "You can use numbers like **0/1/2/3** to navigate settings."
+        ]
+        settings = {
+            uiScale: 1,
+            volume: 1,
+            animationTime: 1,
+            spinTime: 1,
+            showLeaderboard: true,
+            showMinimap: true,
+            resolutionScale: 0.75,
+            imageScaling: 'auto',
+            smoothing: 'predict',
+            showPerformanceActivation: 'toggle',
+            showDebugActivation: 'toggle',
+            renderDebugActivation: 'toggle',
+            keybinds: {
+                showPerformance: ['f'],
+                showDebug: ['i'],
+                renderDebug: ['o'],
+                toggleSettings: ['escape'],
+                toggleChangelog: ['tab'],
+                toggleLeaderboard: ['p'],
+                toggleMinimap: ['m'],
+            }
+        }
+        playerSlot = -1
+        playerColor = 'red'
+        unlockedColors = []
+        remainingColors = []
+        coins = 0
+        colorPrice = Infinity
+        settingsPage = 0
+        changelogOpen = false
+        performanceOpen = false
+        debugOpen = false
+        renderDebugOpen = false
+        menuBgX = 0
+        menuBgY = 0
+        cameraX = 0
+        cameraY = 0
+        cameraTargetX = 0
+        cameraTargetY = 0
+        cameraSpeed = 0
+        deathScreenOpacity = 0
+        inputTimer = 0
+        scene = 0
+        ws = null
+        let fpsFrames = 0, fpsWindow = performance.now(), fpsAvg = 0, fpsLast = 0
+        let mspfSum = 0, mspfCount = 0, mspfAvg = 0, mspfLast = 0
+        resize()
+        
+
+        // render loop
+        lastFrame = performance.now()
+
+        function frame(now) {
+            requestAnimationFrame(frame)
+            let frameStart = performance.now()
+
+            let dt = Math.min((now-lastFrame)/1000*30, 1.5)
+            lastFrame = now
+
+            // interpolate
+            if (settings.smoothing != "off") {
+                if (prev && curr) {
+                    interpolateLobby(clamp((performance.now()-curr.timestamp)/(1000/30), 0, 1))
+                }
+            } else if (curr) {
+                prev = curr = null
+            }
+
+            // render html // render ui
+
+            remainingColors = playerColors.filter(c => !unlockedColors.includes(c))
+            colorPrice = unlockedColors.length-3
+
+            ui.menu.shop.buyColor.classList.toggle('poor', coins < colorPrice)
+            ui.menu.shop.buyColor.classList.toggle('rich', coins >= colorPrice && remainingColors.length != 0)
+            ui.menu.shop.buyColor.classList.toggle('maxed', remainingColors.length == 0)
+            ui.menu.shop.coins.textContent = `Coins: ${coins}🪙`
+            
+            // menu // button animations
+            switch (animations.colorButton.type) {
+                case 0: {
+                    ui.menu.shop.buyColor.textContent = `Buy Color: ${colorPrice}🪙`
+                    ui.menu.shop.buyColor.style.setProperty('--c', `var(--${remainingColors[Math.floor(Date.now()/1000)%remainingColors.length]})`)
+                    ui.menu.shop.buyColor.style.setProperty('--c-outline', `var(--${remainingColors[Math.floor(Date.now()/1000)%remainingColors.length]}-outline)`)
+                } break
+                case 1: {
+                    ui.menu.shop.buyColor.textContent = `Spinning...`
+                    switch (animations.colorButton.state) {
+                        case 1: {
+                            animations.colorButton.time += dt/settings.spinTime
+                            if (animations.colorButton.time >= 15) {
+                                animations.colorButton.state = 2
+                            }
+                            animations.colorButton.speed += animations.colorButton.acceleration*dt/settings.spinTime
+                            animations.colorButton.speed *= Math.pow(0.98, dt/settings.spinTime)
+                            animations.colorButton.angle += animations.colorButton.speed*dt/settings.spinTime
+                        } break
+                        case 2: {
+                            let threshold = 0.25
+                            animations.colorButton.speed *= Math.pow(0.98, dt/settings.spinTime)
+                            animations.colorButton.angle += animations.colorButton.speed*dt/settings.spinTime
+                            if (animations.colorButton.speed < threshold) {
+                                animations.colorButton.type = 2
+                                animations.colorButton.from = animations.colorButton.angle
+                                animations.colorButton.to = Math.round(animations.colorButton.angle/90)*90
+                                animations.colorButton.progress = 0
+                                animations.colorButton.speed = 0
+                                playerColor = remainingColors[animations.colorButton.result]
+                                unlockedColors.push(playerColor)
+                                unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
+                                playSound('bonus')
+                            }
+                        } break
+                    }
+
+                    let crossing = Math.floor(animations.colorButton.angle/90)
+                    if (crossing > animations.colorButton.lastCrossing) {
+                        if (remainingColors.length > 1) {
+                            let oldResult = animations.colorButton.result
+                            animations.colorButton.result = randomInt(0,remainingColors.length-2)
+                            if (animations.colorButton.result >= oldResult) animations.colorButton.result++
+                        }
+                        animations.colorButton.lastCrossing = crossing
+                        playSound('bwooop', 1, randomFloat(0.9,1.1))
+                    }
+
+                    ui.menu.menuControls.colorButton.style.setProperty('--angle', animations.colorButton.angle + 'deg')
+                    ui.menu.menuControls.colorButton.style.setProperty('--c', `var(--${remainingColors[animations.colorButton.result]})`)
+                    ui.menu.menuControls.colorButton.style.setProperty('--c-outline', `var(--${remainingColors[animations.colorButton.result]}-outline)`)
+                    ui.menu.shop.buyColor.style.setProperty('--c', `var(--${remainingColors[animations.colorButton.result]})`)
+                    ui.menu.shop.buyColor.style.setProperty('--c-outline', `var(--${remainingColors[animations.colorButton.result]}-outline)`)
+
+                } break
+                case 2: {
+                    if (animations.colorButton.progress < 1) {
+                        animations.colorButton.progress = Math.min(animations.colorButton.progress+dt/(7.5*settings.animationTime), 1)
+                        animations.colorButton.angle = animations.colorButton.from+(animations.colorButton.to-animations.colorButton.from)*animations.colorButton.progress*animations.colorButton.progress*(3-2*animations.colorButton.progress)
+                        ui.menu.menuControls.colorButton.style.setProperty('--angle', animations.colorButton.angle + 'deg')
+                        if (animations.colorButton.progress >= 1) {animations.colorButton.angle = animations.colorButton.from = animations.colorButton.to = animations.colorButton.type = 0}
+                    }
+                } break
+            }
+
+            switch (animations.playButton.type) {
+                case 1: {
+                    switch (animations.playButton.state) {
+                        case 1: {
+                            animations.playButton.time += dt
+                            if (animations.playButton.time >= 3*30 && playerSlot == -1) {
+                                animations.playButton.result = 2
+                                invalidServers[lobby.id] = true
+                                ui.menu.message.textContent = `failed to connect to ${lobby.id}`
+                                animations.playButton.state = 2
+                                playSound('negativeaction2')
+                                ws.close()
+                            }
+                            animations.playButton.speed += 3.58*dt/settings.spinTime
+                            animations.playButton.speed *= Math.pow(0.905, dt/settings.spinTime)
+                            animations.playButton.angle += animations.playButton.speed*dt/settings.spinTime
+                        } break
+                        case 2: {
+                            let threshold = 0.1
+                            animations.playButton.speed *= (Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle)/(Math.round((animations.playButton.angle+animations.playButton.speed*9.526)/90)*90-animations.playButton.angle+(animations.playButton.speed-threshold)*dt/settings.spinTime)
+                            animations.playButton.angle += animations.playButton.speed*dt/settings.spinTime
+                            if (animations.playButton.speed < threshold) {
+                                animations.playButton.type = 0
+                                animations.playButton.state = 0
+                                animations.playButton.angle = 0
+                                animations.playButton.speed = 0
+                                if (animations.playButton.result == 1) {animations.playButton.result = 0}
+                            }
+                        } break
+                    }
+                    ui.menu.menuControls.playButton.style.setProperty('--angle', animations.playButton.angle + 'deg')
+                } break
+            }
+            ui.menu.menuControls.playButton.classList.toggle('waiting', animations.playButton.result === 3)
+            ui.menu.menuControls.playButton.classList.toggle('retry', animations.playButton.result === 2)
+            ui.menu.menuControls.playButton.classList.toggle('finished', animations.playButton.result === 1)
+
+            if (animations.settingsButton.progress < 1) {
+                animations.settingsButton.progress = Math.min(animations.settingsButton.progress+dt/(7.5*settings.animationTime), 1)
+                animations.settingsButton.angle = (3-2*animations.settingsButton.type)*90*animations.settingsButton.progress*animations.settingsButton.progress*(3-2*animations.settingsButton.progress)
+                ui.menu.bottomRow.settingsButton.style.setProperty('--angle', animations.settingsButton.angle + 'deg')
+                if (animations.settingsButton.progress >= 1) {animations.settingsButton.angle = 0}
+            }
+            if (animations.changelogButton.progress < 1) {
+                animations.changelogButton.progress = Math.min(animations.changelogButton.progress+dt/(7.5*settings.animationTime), 1)
+                animations.changelogButton.angle = (3-2*animations.changelogButton.type)*90*animations.changelogButton.progress*animations.changelogButton.progress*(3-2*animations.changelogButton.progress)
+                ui.menu.bottomRow.changelogButton.style.setProperty('--angle', animations.changelogButton.angle + 'deg')
+                if (animations.changelogButton.progress >= 1) {animations.changelogButton.angle = 0}
+            }
+            if (animations.discordButton.progress < 1) {
+                animations.discordButton.progress = Math.min(animations.discordButton.progress+dt/(7.5*settings.animationTime), 1)
+                animations.discordButton.angle = 180*animations.discordButton.progress*animations.discordButton.progress*(3-2*animations.discordButton.progress)
+                ui.menu.bottomRow.discordButton.style.setProperty('--angle', animations.discordButton.angle + 'deg')
+                if (animations.discordButton.progress >= 1) {animations.discordButton.angle = 0}
+            }
+
+            // HUD html
+
+            // Scenes
+
+            ui.menu.myself.classList.toggle('hidden', scene != 0)
+            if (scene != 0) {ui.menu.tips.style.opacity = 0}
+            ui.hud.myself.classList.toggle('hidden', scene == 0)
+            if (lobby.state == 3) ui.menu.message.textContent = `Game over! Play again?`
+
+            if (playerSlot >= 0) {
+                // scene calc
+
+                // camera
+                
+                // input
+                worldMouseX = (mouseX/scale)+cameraX
+                worldMouseY = (mouseY/scale)+cameraY
+
+                // input packet
+            } else {
+                scene = 0
+            }
+
+            // render shit
+            ctx.clearRect(-canvas.width/scale/2, -canvas.height/scale/2, canvas.width/scale, canvas.height/scale)
+
+            screenSizeX = canvas.width/scale
+            screenSizeY = canvas.height/scale
+
+            if (playerSlot >= 0) {
+                // Grid
+                ctx.fillStyle = '#f7f8ff'
+                ctx.fillRect(-screenSizeX/2, -screenSizeY/2, screenSizeX, screenSizeY)
+
+                ctx.strokeStyle = `#000000${toHex(0.03)}`
+                ctx.lineWidth = 1
+                ctx.beginPath()
+                for (let x = Math.floor((cameraX-screenSizeX/2)/10)*10; x <= cameraX+screenSizeX/2; x += 10) {
+                    ctx.moveTo(x-cameraX, -screenSizeY/2)
+                    ctx.lineTo(x-cameraX, screenSizeY/2)
+                }
+                for (let y = Math.floor((cameraY-screenSizeY/2)/10)*10; y <= cameraY+screenSizeY/2; y += 10) {
+                    ctx.moveTo(-screenSizeX/2, y-cameraY)
+                    ctx.lineTo(screenSizeX/2, y-cameraY)
+                }
+                ctx.stroke()
+
+                // Entities - no: en titties :P
+                // yes i used the same joke from old.cobbled.io's and old.flingy.io's code, cry about it     // Players <-- for ctrl+f
+                for (let i = 0; i < lobby.config.playerLimit; i++) {
+                    //todo
+                }
+
+                // HUD canvas
+
+                gap = 12*(fov/1080)*settings.uiScale
+
+                // Minimap
+                if (settings.showMinimap) {
+                    let size = 45*settings.uiScale
+                    let mx = screenSizeX/2-size-gap
+                    let my = screenSizeY/2-size-gap
+                    let k = size/lobby.borderRadius
+                    //draw
+                }
+
+                // Debug
+                if (settings.showDebugActivation == 'toggle' ? debugOpen : isKeyPressed('i')) {
+                    ui.hud.leaveButton.style.visibility = 'hidden'
+                    drawText(
+`=== PERFORMANCE === (I to close)
+FPS: ${fpsAvg.toFixed(1)} avg (${fpsLast.toFixed(1)} last)
+MSPF: ${mspfAvg.toFixed(1)} avg (${mspfLast.toFixed(1)} last)
+Server TPS: ${lobby.tps.toFixed(1)}
+Resolution: ${canvas.width}x${canvas.height} (${settings.resolutionScale}x of ${Math.round(innerWidth*devicePixelRatio)}x${Math.round(innerHeight*devicePixelRatio)})
+
+=== NETWORK ===
+Ping: #ms avg (#ms last)
+Packet Timing: last: ${prev ? `${(curr.timestamp-prev.timestamp).toFixed(1)}` : `n/a`}ms, current: ${prev ? (performance.now()-curr.timestamp).toFixed(1) : 'n/a'}ms
+Ready: ${ws ? ws.readyState : 'none'}
+Buffered: ${ws ? ws.bufferedAmount : 'none'}
+Smoothing: ${settings.smoothing == 'predict' ? 'interpolation' : settings.smoothing}
+
+=== LOBBY INFO === 
+ID: ${lobby.id} (${lobby.url})
+Gamemode: ${lobby.config.gamemode}
+Closing: ${lobby.closing ? `after this match` : `not yet`}
+
+=== PLAYER ===
+Camera: (${Math.round(cameraX)}, ${Math.round(cameraY)})
+
+=== MISC ===
+Server Count: ${Object.keys(servers || {}).length}
+Invalid Servers: ${JSON.stringify(invalidServers)}
+`, -screenSizeX/2+4+gap, -screenSizeY/2+4+gap, clamp(4/settings.resolutionScale, 8, 12), '#000000', '#ffffff', 1, 0, 'left', 'down')
+                } else if (settings.showPerformanceActivation == 'toggle' ? performanceOpen : isKeyPressed('f')) {
+                    ui.hud.leaveButton.style.visibility = 'hidden'
+                    drawText(
+`=== SHORTENED === (F to close)
+FPS: ${fpsAvg.toFixed(1)} avg (${fpsLast.toFixed(1)} last)
+MSPF: ${mspfAvg.toFixed(1)} avg (${mspfLast.toFixed(1)} last)
+Res: ${canvas.width}x${canvas.height} (${settings.resolutionScale}x)
+Ping: #ms avg (#ms last). For now, you get:
+Packet Timing: last: ${prev ? `${(curr.timestamp-prev.timestamp).toFixed(1)}` : `n/a`}ms, current: ${prev ? (performance.now()-curr.timestamp).toFixed(1) : 'n/a'}ms
+`, -screenSizeX/2+4+gap, -screenSizeY/2+4+gap, clamp(4/settings.resolutionScale, 8, 32), '#000000', '#ffffff', 1, 0, 'left', 'down')
+                } else {ui.hud.leaveButton.style.visibility = 'visible'}
+                if (settings.renderDebugActivation == 'toggle' ? renderDebugOpen : isKeyPressed('o')) {
+                    for (let i = 0; i < playerColors.length; i++) {
+                        let size = 30
+                        drawRect(((i-(playerColors.length-1)/2)*size)-size/2, -screenSizeY/2+size/2, size, size, colors.fill[playerColors[i]], colors.outline[playerColors[i]], 2)
+                        drawText(playerColors[i], ((i-(playerColors.length-1)/2)*size)-size/2, -screenSizeY/2+size+6, 7, colors.fill[playerColors[i]], colors.outline[playerColors[i]], 1)
+                    }
+                }
+                
+            }
+            
+            menuBgX += (-mouseX*0.03-menuBgX)*(1-Math.pow(0.64,dt))
+            menuBgY += (-mouseY*0.03-menuBgY)*(1-Math.pow(0.64,dt))
+            if (menuBgImg.complete && menuBgImg.naturalWidth) {
+                let ratio = menuBgImg.width/menuBgImg.height
+                let dw = Math.max(canvas.width, canvas.height*ratio)*1.1/scale
+                let dh = dw/ratio
+                animations.bgImage.opacity += ((scene == 0 ? 1 : 0)*2-1)*(dt/(15*settings.animationTime))
+                animations.bgImage.opacity = clamp(animations.bgImage.opacity, 0, 1)
+                if (animations.bgImage.opacity != 0) {
+                    ctx.globalAlpha = animations.bgImage.opacity
+                    ctx.drawImage(menuBgImg, -dw/2+menuBgX/scale, -dh/2+menuBgY/scale, dw, dh)
+                    ctx.globalAlpha = 1
+                }
+            }
+
+            // fps // performance
+            fpsFrames++
+            if (now-fpsWindow >= 1000) {
+                fpsLast = fpsAvg
+                fpsAvg = fpsFrames*1000/(now-fpsWindow)
+                fpsFrames = 0
+                fpsWindow = now
+            }
+
+            mspfSum += performance.now()-frameStart
+            mspfCount++
+            if (mspfCount >= 60) {
+                mspfLast = mspfAvg
+                mspfAvg = mspfSum/mspfCount
+                mspfSum = 0
+                mspfCount = 0
+            }
+        }
+
+        function localStorageLoop() {
+            try{statusMessage = JSON.parse(getStoredKey('cobbled_v4_statusMessage'))} catch {statusMessage = null}
+            renderStatus(statusMessage)
+
+            storageVersion = getStoredKey('cobbled_v4_version') || ''
+            if (storageVersion == 'v4.0.0+') {
+                // load existing data
+                console.log(`loading save data (${storageVersion})`)
+
+                username = getStoredKey('cobbled_v4_username')
+                if (username) {ui.menu.menuControls.username.value = username}
+
+                try {unlockedColors = JSON.parse(getStoredKey('cobbled_v4_unlockedColors'))} catch(e) {unlockedColors = null}
+                if (!unlockedColors || !unlockedColors.length) unlockedColors = ['red', 'orange', 'lime', 'blue']
+                unlockedColors = unlockedColors.filter(c => playerColors.includes(c))
+                unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
+                
+                playerColor = getStoredKey('cobbled_v4_playerColor') || unlockedColors[Math.floor(Math.random()*unlockedColors.length)]
+                if (!unlockedColors.includes(playerColor)) {playerColor = unlockedColors[Math.floor(Math.random()*unlockedColors.length)]}
+            
+                coins = Number(getStoredKey('cobbled_v4_coins')) || 0
+
+                try {Object.assign(settings, JSON.parse(getStoredKey('cobbled_v4_settings') || '{}'))} catch {}
+                loadSettings()
+            } else {
+                // truly new user
+                console.log(`creating new save data (${storageVersion})`)
+                username = ''
+                unlockedColors = ['red', 'orange', 'lime', 'blue']
+                unlockedColors.sort((a, b) => playerColors.indexOf(a)-playerColors.indexOf(b))
+                playerColor = unlockedColors[Math.floor(Math.random()*unlockedColors.length)]
+                coins = 0
+            }
+            ui.menu.menuControls.colorButton.style.setProperty('--c', `var(--${playerColor})`)
+            ui.menu.menuControls.colorButton.style.setProperty('--c-outline', `var(--${playerColor}-outline)`)
+
+            setInterval(() => {
+                setStoredKey('cobbled_v4_version', 'v4.0.0+')
+                setStoredKey('cobbled_v4_username', username)
+                setStoredKey('cobbled_v4_coins', coins.toString())
+                setStoredKey('cobbled_v4_playerColor', playerColor)
+                setStoredKey('cobbled_v4_unlockedColors', JSON.stringify(unlockedColors))
+                setStoredKey('cobbled_v4_settings', JSON.stringify(settings))
+            }, 3000)
+        }
+
+        menuBgImg = new Image()
+        menuBgImg.src = 'images/cobbled.io red-replaced v2.png'
+
+        changelogData = null
+        fetch('changelog.json', {cache: 'no-store'})
+            .then(r => r.json())
+            .then(d => {
+                changelogData = d
+                if (changelogData) console.log('loaded changelog data')
+                else console.log("couldn't load changelog data")
+            })
+            .catch(() => console.log("couldn't load changelog data"))
+
+        settingsData = null
+        fetch('settings.json', {cache: 'no-store'})
+            .then(r => r.json())
+            .then(d => {
+                settingsData = d
+                if (settingsData) console.log('loaded settings data')
+                else console.log("couldn't load settings data")
+            })
+            .catch(() => console.log("couldn't load settings data"))
+
+        function loadSettings() {
+            resize()
+            masterGain.gain.value = settings.volume
+            document.documentElement.style.setProperty('--transition', settings.animationTime)
+            document.documentElement.style.setProperty('--image-rendering', settings.imageScaling)
+        }
+
+        requestAnimationFrame(frame)
+        localStorageLoop()
+        tipsLoop()
+        loadSounds(['bonus.opus','bwooop.opus','matchfound2.opus','negativeaction.opus','negativeaction2.opus'])
+    </script>
+</body>
+</html>

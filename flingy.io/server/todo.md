@@ -4,6 +4,7 @@
 ### Bugs
 - there is no duplicate connection check. a client can just: connect multiple times lol.
   - in fact, there's no checks at all. a player can just join midgame rn.
+- `go http.ListenAndServe(...)` error is ignored: a second server instance logs "Started websocket server" but can't bind, and silently registers duplicate lobbies. Log the error (and maybe exit).
 
 ### Team Mode
 - rank/placement per team instead of per player

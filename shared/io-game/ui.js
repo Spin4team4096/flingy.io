@@ -1,4 +1,204 @@
-// required vars: settings, settingsData, settingsPage, ui.settings, loadSettings(), playSound(), randomFloat(), renderPanel(), ui.menu.status
+// required vars: settings, settingsData, settingsPage, ui.settings, loadSettings(), playSound(), randomFloat(), renderPanel(), ui.menu.status, and more idk man. just have everything bro
+
+ui = {
+    menu: {
+        myself: document.getElementById('menu'),
+        logo: document.getElementById('logo'),
+        menuControls: {
+            colorButton: document.getElementById('color-button'),
+            username: document.getElementById('username'),
+            playButton: document.getElementById('play-button'),
+        },
+        message: document.getElementById('message'),
+        status: document.getElementById('status'),
+        gamemodeList: document.getElementById('gamemode-list'),
+        shop: {
+            coins: document.getElementById('coins'),
+            buyColor: document.getElementById('buy-color'),
+        },
+        bottomRow: {
+            settingsButton: document.getElementById('settings-button'),
+            changelogButton: document.getElementById('changelog-button'),
+            discordButton: document.getElementById('discord-button'),
+        },
+        tips: document.getElementById('tips'),
+    },
+    hud: {
+        myself: document.getElementById('hud'),
+        leaveButton: document.getElementById('leave-button'),
+        notifications: document.getElementById('notifications'),
+        leaderboard: document.getElementById('leaderboard'),
+        bottomMessage: document.getElementById('bottom-message'),
+    },
+    settings: document.getElementById('settings-panel'),
+    changelog: document.getElementById('changelog-panel'),
+}
+
+animations = {
+    colorButton: {
+        type: 0, // 0 no animation, 1 is free spin, 2 is 90 deg spin
+        angle: 0,
+        progress: 1,
+        from: 0,
+        to: 0,
+
+        state: 0, // 0 idle, 1 accelerating, 2 decelleraintgjngg
+        speed: 0,
+        time: 0,
+        acceleration: 0,
+        lastCrossing: 0,
+    },
+    playButton: {
+        type: 0, // 0 no animation, 1 is free spin, 2 is 90 deg spin, 3 is wiggle
+        state: 0, // 0 idle, 1 accelerating, 2 decelleraintgjngg. this is why it's numbers, cuz i can't speel
+        result: 0, // 0 waiting green, 1 success green, 2 failed yellow, 3 waiting red
+        angle: 0,
+        speed: 0,
+        time: 0,
+    },
+    settingsButton: {
+        type: 0, // 0 no animation, 1 is 90 spin clockwise, 2 is 90 spin anticlockwise
+        angle: 0,
+        progress: 1,
+    },
+    changelogButton: {
+        type: 0, // 0 no animation, 1 is 90 spin clockwise, 2 is 90 spin anticlockwise
+        angle: 0,
+        progress: 1,
+    },
+    discordButton: {
+        type: 0, // 0 no animation, 1 is 180 spin
+        angle: 0,
+        progress: 1,
+    },
+    bgImage: {
+        opacity: 1, 
+    }
+}
+
+ui.menu.menuControls.colorButton.addEventListener('pointerdown', () => {
+    if (animations.colorButton.type == 1) return
+    playSound('bwooop', 1, randomFloat(0.9,1.1))
+    animations.colorButton.type = 2
+    animations.colorButton.to += 90
+    animations.colorButton.from = animations.colorButton.angle
+    animations.colorButton.progress = 0
+
+    playerColor = unlockedColors[(unlockedColors.indexOf(playerColor)+1)%unlockedColors.length]
+    ui.menu.menuControls.colorButton.style.setProperty('--c', `var(--${playerColor})`)
+    ui.menu.menuControls.colorButton.style.setProperty('--c-outline', `var(--${playerColor}-outline)`)
+})
+
+ui.menu.menuControls.playButton.addEventListener('pointerdown', () => {
+    if (animations.playButton.state != 0 && animations.playButton.result < 2) return
+    playSound('bwooop', 1, randomFloat(0.9,1.1))
+    animations.playButton.type = 1
+    animations.playButton.state = 1
+    animations.playButton.result = 0
+    animations.playButton.angle = 0
+    animations.playButton.speed = 0
+    animations.playButton.time = 0
+    playerSlot = -1
+    pickServer()
+})
+
+settingsClearTimeout = null
+function toggleSettings() {
+    settingsPage = settingsPage != 0 ? 0 : 1
+    ui.settings.classList.toggle('open', settingsPage != 0)
+    if (changelogOpen) {
+        changelogOpen = !changelogOpen
+        ui.changelog.classList.toggle('open', changelogOpen)
+        animations.changelogButton.type = changelogOpen == true ? 1 : 2
+        animations.changelogButton.angle = 0
+        animations.changelogButton.progress = 0
+    }
+    playSound('bwooop', 1, settingsPage != 0 ? 1.1 : 0.9)
+    animations.settingsButton.type = settingsPage != 0 ? 1 : 2
+    animations.settingsButton.angle = 0
+    animations.settingsButton.progress = 0
+    clearTimeout(settingsClearTimeout)
+    if (settingsPage != 0) {
+        renderPanel(ui.settings, settingsData[settingsPage])
+    } else {
+        settingsClearTimeout = setTimeout(() => {
+            ui.settings.replaceChildren()
+        }, 250*settings.animationTime)
+    }
+}
+ui.menu.bottomRow.settingsButton.addEventListener('pointerdown', () => {toggleSettings()})
+
+changelogClearTimeout = null
+function toggleChangelog() {
+    changelogOpen = !changelogOpen
+    ui.changelog.classList.toggle('open', changelogOpen)
+    if (settingsPage != 0) {
+        settingsPage = settingsPage != 0 ? 0 : 1
+        ui.settings.classList.toggle('open', settingsPage != 0)
+        animations.settingsButton.type = settingsPage != 0 ? 1 : 2
+        animations.settingsButton.angle = 0
+        animations.settingsButton.progress = 0
+    }
+    playSound('bwooop', 1, changelogOpen == true ? 1.1 : 0.9)
+    animations.changelogButton.type = changelogOpen == true ? 1 : 2
+    animations.changelogButton.angle = 0
+    animations.changelogButton.progress = 0
+    clearTimeout(changelogClearTimeout)
+    if (changelogOpen) {
+        renderPanel(ui.changelog, changelogData)
+    } else {
+        changelogClearTimeout = setTimeout(() => {
+            ui.changelog.replaceChildren()
+        }, 250*settings.animationTime)
+    }
+}
+ui.menu.bottomRow.changelogButton.addEventListener('pointerdown', () => {toggleChangelog()})
+
+ui.menu.bottomRow.discordButton.addEventListener('click', () => {
+    if (animations.discordButton.progress < 1) return
+    playSound('bwooop', 1, randomFloat(0.9,1.1))
+    animations.discordButton.type = 1
+    animations.discordButton.angle = 0
+    animations.discordButton.progress = 0
+    setTimeout(() => {
+        window.open('https://discord.gg/z2uZvEXfPx', '_blank')
+    }, 300*settings.animationTime)
+})
+
+ui.menu.shop.buyColor.addEventListener('click', () => {
+    if (animations.colorButton.type != 0) return
+    if (coins < colorPrice || remainingColors.length == 0) {
+        playSound('negativeaction')
+        return
+    }
+    coins -= colorPrice
+    animations.colorButton.type = 1
+    animations.colorButton.state = 1
+    animations.colorButton.result = 0
+    animations.colorButton.angle = 0
+    animations.colorButton.speed = 0
+    animations.colorButton.time = 0
+    animations.colorButton.acceleration = randomFloat(3.5, 4.0)
+    animations.colorButton.lastCrossing = 0
+})
+
+ui.hud.leaveButton.addEventListener('click', () => {
+    playSound('negativeaction2')
+    ws.close()
+})
+
+ui.menu.menuControls.username.addEventListener('input', () => {
+    username = ui.menu.menuControls.username.value
+})
+
+addEventListener('pointerdown', e => {
+    if (settingsPage != 0 && !ui.settings.contains(e.target) && !ui.menu.bottomRow.settingsButton.contains(e.target)) {
+        toggleSettings()
+    }
+    if (changelogOpen && !ui.changelog.contains(e.target) && !ui.menu.bottomRow.changelogButton.contains(e.target)) {
+        toggleChangelog()
+    }
+})
 
 function parseMarkdown(text) {
     let fragment = document.createDocumentFragment()
@@ -89,6 +289,50 @@ function parseMarkdownRange(text) {
         i++
     }
     return nodes
+}
+
+function renderPanel(panel, data) {
+    panel.replaceChildren()
+    let e = document.createElement(`div`)
+    e.className = 'title'
+    e.textContent = data['title']
+    e.onclick = () => {
+        switch (settingsPage) {
+            case 0: {
+                switch (changelogOpen) {
+                    case true: {
+                        toggleChangelog()
+                    } break
+                }
+            } break
+            case 1: {
+                toggleSettings()
+            } break
+            case 2: {
+                settingsPage = 1
+                renderPanel(ui.settings, settingsData[settingsPage])
+                playSound('bwooop', 1, 0.9)
+            } break
+            case 3: {
+                settingsPage = 1
+                renderPanel(ui.settings, settingsData[settingsPage])
+                playSound('bwooop', 1, 0.9)
+            } break
+            case 4: {
+                settingsPage = 1
+                renderPanel(ui.settings, settingsData[settingsPage])
+                playSound('bwooop', 1, 0.9)
+            } break
+            default: {
+                settingsPage = 1
+                renderPanel(ui.settings, settingsData[settingsPage])
+                playSound('bwooop', 1, 0.9)
+            } break
+        }
+    }
+    panel.append(e)
+
+    renderPanelNodes(panel, data['children'])
 }
 
 function renderPanelNodes(parent, nodes) {
@@ -250,4 +494,18 @@ function renderStatus(statusMessage) {
     } else if (ui.menu.status) {
         ui.menu.status.replaceChildren()
     }
+}
+
+function tipsLoop() {
+    tipIndex = 0
+    ui.menu.tips.replaceChildren(parseMarkdown(tips[tipIndex]))
+    ui.menu.tips.style.opacity = 1
+    setInterval(() => {
+        ui.menu.tips.style.opacity = 0
+        setTimeout(() => {
+            tipIndex = (tipIndex+1)%tips.length
+            ui.menu.tips.replaceChildren(parseMarkdown(tips[tipIndex]))
+            if (scene == 0) {ui.menu.tips.style.opacity = 1}
+        }, 1000*settings.animationTime)
+    }, 10000)
 }
